@@ -4,11 +4,18 @@
 import config
 import peewee
 
-conn = peewee.MySQLDatabase(
-    config.MYSQL_DBNAME, \
-    host = config.MYSQL_DBHOST, \
-    port = config.MYSQL_DBPORT, \
-    user = config.MYSQL_DBUSER, \
-    password = config.MYSQL_DBPASS, \
+peewee.QueryCompiler.field_map['char'] = 'CHAR'
+
+class StaticCharField(peewee.CharField):
+    db_field = 'char'
+
+default_db = peewee.MySQLDatabase(
+    database = config.DEFAULT_DBNAME, \
+    host = config.DEFAULT_DBHOST, \
+    port = config.DEFAULT_DBPORT, \
+    user = config.DEFAULT_DBUSER, \
+    password = config.DEFAULT_DBPASS, \
 )
+
+dbs = [peewee.MySQLDatabase(**params) for params in config.STORE]
 
