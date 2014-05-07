@@ -14,7 +14,7 @@ class Site(peewee.Model):
     token = StaticCharField(unique=True, max_length=32)
     name = peewee.CharField(null=False, max_length=64)
     ctime = peewee.DateTimeField(default=datetime.datetime.now)
-    topics = peewee.BigIntegerField(default=0)
+    comments = peewee.BigIntegerField(default=0)
     blocks = peewee.BigIntegerField(default=0)
     node = peewee.IntegerField(null=True)
 
