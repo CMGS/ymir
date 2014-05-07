@@ -1,11 +1,17 @@
 #!/usr/bin/python
 #coding:utf-8
 
+from utils.fn import get_node
 from common import default_db
 from models.site import Site, Block
 
+@default_db.commit_on_success
 def create(token, name):
-    return Site.create(token=token, name=name)
+    site = Site.create(token=token, name=name)
+    node = get_node(site.id)
+    query = site.update(node=node)
+    query.execute()
+    return site
 
 @default_db.commit_on_success
 def block(token, ip):

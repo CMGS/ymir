@@ -18,4 +18,6 @@ default_db = peewee.MySQLDatabase(
 )
 
 dbs = [peewee.MySQLDatabase(**params) for params in config.STORE]
+dbs_len = len(dbs)
+dbs_mod = 10**dbs_len
 
