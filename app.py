@@ -2,7 +2,12 @@
 #coding:utf-8
 
 import falcon
+import logging
 from handlers.site import Site, Block
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
 
 class HelloWorld(object):
     def on_get(self, req, resp):

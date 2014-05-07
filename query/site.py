@@ -1,13 +1,17 @@
 #!/usr/bin/python
 #coding:utf-8
 
+from common import default_db
 from models.site import Site, Block
 
 def create(token, name):
     return Site.create(token=token, name=name)
 
+@default_db.commit_on_success
 def block(token, ip):
     site = get_site_by_token(token)
+    query = site.update(blocks=Site.blocks + 1)
+    query.execute()
     return Block.create(sid=site.id, ip=ip)
 
 def delete_block(token, id):

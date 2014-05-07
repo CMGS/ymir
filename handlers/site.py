@@ -5,10 +5,12 @@ import json
 import uuid
 import config
 import falcon
+import logging
 
 from query.site import create, block, \
         delete_block, get_blocks
 
+logger = logging.getLogger(__name__)
 
 class Site(object):
 
@@ -23,6 +25,7 @@ class Site(object):
         try:
             site = create(token, name)
         except Exception:
+            logger.exception('create')
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'create failed')
 
         resp.status = falcon.HTTP_201
@@ -36,6 +39,7 @@ class Block(object):
         try:
             bip = block(token, ip)
         except Exception:
+            logger.exception('create')
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'create failed')
 
         resp.status = falcon.HTTP_201

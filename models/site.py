@@ -15,6 +15,7 @@ class Site(peewee.Model):
     name = peewee.CharField(null=False, max_length=64)
     ctime = peewee.DateTimeField(default=datetime.datetime.now)
     topics = peewee.BigIntegerField(default=0)
+    blocks = peewee.BigIntegerField(default=0)
 
 class Block(peewee.Model):
 
