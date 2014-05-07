@@ -22,7 +22,7 @@ class Block(peewee.Model):
         database = default_db
 
     id = peewee.PrimaryKeyField()
-    aid = peewee.IntegerField(null=False, index=True)
+    sid = peewee.IntegerField(null=False, index=True)
     ip = peewee.CharField(max_length=15)
     ctime = peewee.DateTimeField(default=datetime.datetime.now)
 
