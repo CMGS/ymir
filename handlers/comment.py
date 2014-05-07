@@ -5,9 +5,10 @@ import json
 import config
 import falcon
 import logging
+from collections import OrderedDict
 
 from query.site import get_block, get_site_by_token
-from query.comment import create
+from query.comment import create, get_comments
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,43 @@ class Comment(object):
         resp.body = json.dumps({'id': comment.id})
 
     def on_get(self, req, resp, token):
-        pass
+        site = self.get_site(token)
+        params = json.load(req.stream)
+
+        page = int(params.get('page', 0))
+        tid = int(params.get('tid', 0 ))
+        if page < 1:
+            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
+        num = int(params.get('num', config.DEFAULT_PAGE_NUM))
+        expand = bool(params.get('expand', 0))
+
+        try:
+            comments = get_comments(site, tid, expand, page, num)
+        except Exception:
+            raise falcon.HTTPNotAcceptable('no comments')
+
+        resp.status = falcon.HTTP_200
+        if not expand:
+            resp.body = self.render_comments_without_expand(comments)
+        else:
+            resp.body = self.render_comments_with_expand(comments)
+
+    def render_comments_with_expand(self, comments):
+        result = OrderedDict()
+        for comment in comments:
+            if comment.fid and result.get(comment.fid):
+                result[comment.fid].append(
+                    {'content':comment.content, 'ip':comment.ip, 'ctime':str(comment.ctime)}
+                )
+                continue
+            result[comment.id] = [{'content':comment.content, 'ip':comment.ip, 'ctime':str(comment.ctime)}]
+        return json.dumps(result.values())
+
+    def render_comments_without_expand(self, comments):
+        return json.dumps(
+                [{'content':comment.content, 'ip':comment.ip, 'ctime':str(comment.ctime)} \
+                for comment in comments]
+        )
 
     def get_site(self, token):
         try:

@@ -3,6 +3,7 @@
 
 import config
 import common
+from models.site import Site
 from models.comment import Comment
 
 local = {}
@@ -21,6 +22,19 @@ def create(site, tid, fid, uid, ip, content):
     if not comment_table:
         comment_table = generate(site.id, site.token, site.node)
 
-    comment = comment_table.create(tid=tid, fid=fid, uid=uid, ip=ip, content=content)
+    comment = None
+    with common.dbs[site.node].transaction():
+        query = site.update(comments=Site.comments + 1)
+        query.execute()
+        comment = comment_table.create(tid=tid, fid=fid, uid=uid, ip=ip, content=content)
     return comment
+
+def get_comments(site, tid, expand, page, num):
+    comment_table = local.get(site.token, None)
+    if not comment_table:
+        comment_table = generate(site.id, site.token, site.node)
+
+    if not expand:
+        return comment_table.select().where(comment_table.tid==tid, comment_table.fid==0).paginate(page, num)
+    return comment_table.select().where(comment_table.tid==tid).paginate(page, num)
 

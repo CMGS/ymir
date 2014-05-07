@@ -51,26 +51,25 @@ class Block(object):
         try:
             delete_block(token, id)
         except Exception:
-            raise falcon.HTTPInternalServerError(config.HTTP_500, 'delete failed')
+            raise falcon.HTTPNotAcceptable('block or site not exists')
 
         resp.status = falcon.HTTP_200
 
     def on_get(self, req, resp):
         token, page, params = self.parse_params(req, 'page')
-        if not isinstance(page, int) or page < 1:
+        page = int(page)
+        if page < 1:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
         num = int(params.get('num', config.DEFAULT_PAGE_NUM))
 
         try:
             blocks = get_blocks(token, page, num)
         except Exception:
-            raise falcon.HTTPInternalServerError(config.HTTP_500, 'get block failed')
+            resp.status = falcon.HTTP_204
+            raise falcon.HTTPNotAcceptable('no blocks')
 
-        result = []
-        for block in blocks:
-            result.append({'ip':block.ip, 'ctime':str(block.ctime)})
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps(result)
+        resp.body = json.dumps([{'ip':block.ip, 'ctime':str(block.ctime)} for block in blocks])
 
     def parse_params(self, req, data='ip'):
         params = json.load(req.stream)

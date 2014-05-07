@@ -26,7 +26,7 @@ def block(token, ip):
 
 def delete_block(token, id):
     site = get_site_by_token(token)
-    block = Block.get(Block.id==id).get(Block.sid==site.id)
+    block = Block.get(Block.id==id, Block.sid==site.id)
     return block.delete_instance()
 
 def get_blocks(token, page, num):
