@@ -31,6 +31,7 @@ DENY_TIME = 180
 DEFAULT_PAGE_NUM = 20
 
 HTTP_400 = 'Bad Request'
+HTTP_403 = 'Request Forbidden'
 HTTP_500 = 'Internal Error'
 
 try:

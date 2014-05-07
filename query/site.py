@@ -13,7 +13,8 @@ def create(token, name):
     node = get_node(site.id)
     query = site.update(node=node)
     query.execute()
-    generate(site, node)
+    comment_table = generate(site.id, token, node)
+    comment_table.create_table()
     return site
 
 @default_db.commit_on_success
@@ -31,6 +32,11 @@ def delete_block(token, id):
 def get_blocks(token, page, num):
     site = get_site_by_token(token)
     return Block.select().where(Block.sid==site.id).paginate(page, num)
+
+def get_block(token, ip):
+    site = get_site_by_token(token)
+    block = Block.get(Block.sid==site.id).get(Block.ip==ip)
+    return block
 
 def get_site_by_token(token):
     return Site.get(Site.token==token)

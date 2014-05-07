@@ -3,6 +3,7 @@
 
 import falcon
 import logging
+from handlers.comment import Comment
 from handlers.site import Site, Block
 
 logger = logging.getLogger()
@@ -18,4 +19,5 @@ app = falcon.API()
 app.add_route('/', HelloWorld())
 app.add_route('/site', Site())
 app.add_route('/block', Block())
+app.add_route('/m/{token}', Comment())
 
