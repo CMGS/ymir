@@ -7,6 +7,8 @@ DEFAULT_DBUSER = 'root'
 DEFAULT_DBPASS = ''
 DEFAULT_DBNAME = 'comment'
 
+DEFAULT_TABLE_NAME = 'comment'
+
 STORE = [
     {
         'host':'127.0.0.1', \

@@ -4,7 +4,7 @@
 import peewee
 import datetime
 
-class Comment(object):
+class Comment(peewee.Model):
 
     id = peewee.PrimaryKeyField()
     tid = peewee.IntegerField(null=False, index=True)
