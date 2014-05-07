@@ -26,6 +26,8 @@ REDIS_POOL_SIZE = 100
 REPEAT_TIME = 20
 DENY_TIME = 180
 
+DEFAULT_PAGE_NUM = 20
+
 HTTP_400 = 'Bad Request'
 HTTP_500 = 'Internal Error'
 
