@@ -2,12 +2,12 @@
 #coding:utf-8
 
 import logging
-from models.app import App, Block
+from models.site import Site, Block
 
 logger = logging.getLogger('peewee')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
 
-App.create_table()
-Block.create_table()
+Site.create_table(fail_silently=True)
+Block.create_table(fail_silently=True)
 

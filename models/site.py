@@ -5,7 +5,7 @@ import peewee
 import datetime
 from common import default_db, StaticCharField
 
-class App(peewee.Model):
+class Site(peewee.Model):
 
     class Meta:
         database = default_db
