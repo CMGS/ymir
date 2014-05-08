@@ -7,12 +7,13 @@ import falcon
 import logging
 from collections import OrderedDict
 
-from query.site import get_block, get_site_by_token
+from handlers import BaseHandler
+from query.site import get_block
 from query.comment import create, get_comments
 
 logger = logging.getLogger(__name__)
 
-class Comment(object):
+class Comment(BaseHandler):
 
     def on_put(self, req, resp, token):
         site = self.get_site(token)
@@ -27,20 +28,17 @@ class Comment(object):
         if not tid or not uid or not ip or not content:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
 
-        try:
-            #TODO perfermance
-            get_block(token, ip)
-        except Exception:
-            pass
-        else:
+        #HEAT PROTECT
+        #CACHE FOR LONG TIME
+        if get_block(site.id. ip):
             logger.info('IP %s deny' % ip)
             raise falcon.HTTPForbidden(config.HTTP_403, 'ip %s deny' % ip)
 
         try:
             comment = create(site, tid, fid, uid, ip, content)
-        except:
-            logger.exception('create')
-            raise falcon.HTTPInternalServerError(config.HTTP_500, 'create failed')
+        except Exception:
+            logger.exception('create comment')
+            raise falcon.HTTPInternalServerError(config.HTTP_500, 'create comment failed')
 
         resp.status = falcon.HTTP_201
         resp.body = json.dumps({'id': comment.id})
@@ -56,12 +54,13 @@ class Comment(object):
         num = int(params.get('num', config.DEFAULT_PAGE_NUM))
         expand = bool(params.get('expand', 0))
 
-        try:
-            comments = get_comments(site, tid, expand, page, num)
-        except Exception:
-            raise falcon.HTTPNotAcceptable('no comments')
+        comments = get_comments(
+            site.id, site.token, site.node, \
+            tid, expand, page, num
+        )
 
         resp.status = falcon.HTTP_200
+
         if not expand:
             resp.body = self.render_comments_without_expand(comments)
         else:
@@ -71,25 +70,21 @@ class Comment(object):
         result = OrderedDict()
         for comment in comments:
             if comment.fid and result.get(comment.fid):
-                result[comment.fid].append(
-                    {'content':comment.content, 'ip':comment.ip, 'ctime':str(comment.ctime)}
-                )
+                result[comment.fid].append(self.render_comment(comment))
                 continue
-            result[comment.id] = [{'content':comment.content, 'ip':comment.ip, 'ctime':str(comment.ctime)}]
+            result[comment.id] = [self.render_comment(comment)]
         return json.dumps(result.values())
 
     def render_comments_without_expand(self, comments):
         return json.dumps(
-                [{'content':comment.content, 'ip':comment.ip, 'ctime':str(comment.ctime)} \
-                for comment in comments]
+            [self.render_comment(comment) for comment in comments]
         )
 
-    def get_site(self, token):
-        try:
-            site = get_site_by_token(token)
-        except Exception:
-            raise falcon.HTTPNotFound()
-        else:
-            return site
 
-
+    def render_comment(self, comment):
+        return {
+                   'id':comment.id, \
+                   'content':comment.content, \
+                   'ip':comment.ip, \
+                   'ctime':str(comment.ctime), \
+               }

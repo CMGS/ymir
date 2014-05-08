@@ -7,12 +7,14 @@ import config
 import falcon
 import logging
 
+from handlers import BaseHandler
+
 from query.site import create, block, \
         delete_block, get_blocks
 
 logger = logging.getLogger(__name__)
 
-class Site(object):
+class Site(BaseHandler):
 
     def on_put(self, req, resp):
         params = json.load(req.stream)
@@ -26,7 +28,7 @@ class Site(object):
             site = create(token, name)
         except Exception:
             logger.exception('create')
-            raise falcon.HTTPInternalServerError(config.HTTP_500, 'create failed')
+            raise falcon.HTTPInternalServerError(config.HTTP_500, 'create site failed')
 
         resp.status = falcon.HTTP_201
         resp.body = json.dumps({'token': site.token})
@@ -35,23 +37,26 @@ class Block(object):
 
     def on_put(self, req, resp):
         token, ip, _ = self.parse_params(req)
+        site = self.get_site(token)
 
         try:
-            bip = block(token, ip)
+            bip = block(site, ip)
         except Exception:
             logger.exception('create')
-            raise falcon.HTTPInternalServerError(config.HTTP_500, 'create failed')
+            raise falcon.HTTPInternalServerError(config.HTTP_500, 'create block failed')
 
         resp.status = falcon.HTTP_201
         resp.body = json.dumps({'id': bip.id})
 
     def on_delete(self, req, resp):
         token, id, _ = self.parse_params(req, 'id')
+        site = self.get_site(token)
 
         try:
-            delete_block(token, id)
+            delete_block(site, id)
         except Exception:
-            raise falcon.HTTPNotAcceptable('block or site not exists')
+            logger.exception('delete')
+            raise falcon.HTTPInternalServerError(config.HTTP_500, 'delete block failed')
 
         resp.status = falcon.HTTP_200
 
@@ -62,14 +67,10 @@ class Block(object):
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
         num = int(params.get('num', config.DEFAULT_PAGE_NUM))
 
-        try:
-            blocks = get_blocks(token, page, num)
-        except Exception:
-            resp.status = falcon.HTTP_204
-            raise falcon.HTTPNotAcceptable('no blocks')
-
+        site = self.get_site(token)
+        blocks = get_blocks(site.id, page, num)
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps([{'ip':block.ip, 'ctime':str(block.ctime)} for block in blocks])
+        resp.body = json.dumps([{'id':block.id, 'ip':block.ip, 'ctime':str(block.ctime)} for block in blocks])
 
     def parse_params(self, req, data='ip'):
         params = json.load(req.stream)

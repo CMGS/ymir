@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #coding:utf-8
 
+import falcon
 from utils.fn import get_node
 from common import default_db
 from models.site import Site, Block
@@ -18,26 +19,23 @@ def create(token, name):
     return site
 
 @default_db.commit_on_success
-def block(token, ip):
-    site = get_site_by_token(token)
+def block(site, ip):
     query = site.update(blocks=Site.blocks + 1)
     query.execute()
     return Block.create(sid=site.id, ip=ip)
 
-def delete_block(token, id):
-    site = get_site_by_token(token)
-    block = Block.get(Block.id==id, Block.sid==site.id)
-    return block.delete_instance()
+def delete_block(site, id):
+    q = Block.delete().where(
+            Block.id==id, Block.sid==site.id
+        )
+    return q.execute()
 
-def get_blocks(token, page, num):
-    site = get_site_by_token(token)
-    return Block.select().where(Block.sid==site.id).paginate(page, num)
+def get_blocks(sid, page, num):
+    return Block.select().where(Block.sid==sid).paginate(page, num)
 
-def get_block(token, ip):
-    site = get_site_by_token(token)
-    block = Block.get(Block.sid==site.id).get(Block.ip==ip)
-    return block
+def get_block(sid, ip):
+    return Block.select().where(Block.sid==sid, Block.ip==ip).first()
 
 def get_site_by_token(token):
-    return Site.get(Site.token==token)
+    return Site.select().where(Site.token==token).first()
 

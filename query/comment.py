@@ -17,23 +17,22 @@ def generate(sid, token, node):
     local[token] = comment_table
     return comment_table
 
-def create(site, tid, fid, uid, ip, content):
-    comment_table = local.get(site.token, None)
+def get_table(sid, token, node):
+    comment_table = local.get(token, None)
     if not comment_table:
-        comment_table = generate(site.id, site.token, site.node)
+        comment_table = generate(sid, token, node)
+    return comment_table
 
-    comment = None
+def create(site, tid, fid, uid, ip, content):
+    comment_table = get_table(site.id, site.token, site.node)
     with common.dbs[site.node].transaction():
-        query = site.update(comments=Site.comments + 1)
-        query.execute()
+        site.comments = Site.comments + 1
+        site.save()
         comment = comment_table.create(tid=tid, fid=fid, uid=uid, ip=ip, content=content)
     return comment
 
-def get_comments(site, tid, expand, page, num):
-    comment_table = local.get(site.token, None)
-    if not comment_table:
-        comment_table = generate(site.id, site.token, site.node)
-
+def get_comments(sid, token, node, tid, expand, page, num):
+    comment_table = get_table(sid, token, node)
     if not expand:
         return comment_table.select().where(comment_table.tid==tid, comment_table.fid==0).paginate(page, num)
     return comment_table.select().where(comment_table.tid==tid).paginate(page, num)
