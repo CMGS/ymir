@@ -20,8 +20,9 @@ def cleanup():
     from models.site import Site, Block
     Site.drop_table(fail_silently=True)
     Block.drop_table(fail_silently=True)
-    import common
-    common.default_db.execute_sql('DROP TABLE IF EXISTS `comment_1;`')
+    from query.comment import local
+    for k, v in local.iteritems():
+        v.drop_table(fail_silently=True)
 
 if __name__ == '__main__':
     try:
