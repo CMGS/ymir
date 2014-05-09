@@ -13,11 +13,10 @@ from tests.base import CommentTestBase
 class TestSys(CommentTestBase):
 
     def test_get(self):
-        mock = testing.StartResponseMock()
-        response = app(testing.create_environ(path='/sys'), mock)
+        response = app(testing.create_environ(path='/sys'), self.mock)
 
         self.assertTrue(is_iter(response))
-        self.assertEqual(falcon.HTTP_200, mock.status)
+        self.assertEqual(falcon.HTTP_200, self.mock.status)
 
         data = json.loads(''.join(response))
         self.assertIsInstance(data, dict)

@@ -3,29 +3,22 @@
 
 import json
 import falcon
-from falcon import testing
 
-from app import app
 from query.site import block, get_site_by_token
 
 from tests.base import is_iter
-from tests.base import TEST_TOKEN
 from tests.base import CommentTestBase
 
 class TestBlock(CommentTestBase):
 
     def setUp(self):
         super(TestBlock, self).setUp()
-        self.mock = testing.StartResponseMock()
+        self.path = '/block'
 
     def test_add_block(self):
-        response = app(
-            testing.create_environ(
-                path='/block', \
-                method='PUT', \
-                body=json.dumps({'ip': '192.168.1.1', 'token': TEST_TOKEN}), \
-            ), \
-            self.mock, \
+        response = self.send_request(
+            path=self.path, method='PUT', \
+            data=json.dumps({'ip': '192.168.1.1', 'token': self.token}), \
         )
 
         self.assertTrue(is_iter(response))
@@ -36,33 +29,24 @@ class TestBlock(CommentTestBase):
         self.assertTrue(id)
         self.assertIsInstance(id, int)
 
-        self._test_bad_request('/block', 'PUT')
-
+        self._test_bad_request(self.path, 'PUT')
 
     def test_rm_block(self):
-        site = get_site_by_token(TEST_TOKEN)
+        site = get_site_by_token(self.token)
         nblock = block(site, '192.168.1.1')
 
-        response = app(
-            testing.create_environ(
-                path='/block', \
-                method='DELETE', \
-                body=json.dumps({'id': nblock.id, 'token': TEST_TOKEN}), \
-            ), \
-            self.mock, \
+        response = self.send_request(
+            path=self.path, method='DELETE', \
+            data=json.dumps({'id': nblock.id, 'token': self.token}), \
         )
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
 
     def test_get_block(self):
-        response = app(
-            testing.create_environ(
-                path='/block', \
-                method='GET', \
-                body=json.dumps({'page': 1, 'token': TEST_TOKEN, 'num': 1}), \
-            ), \
-            self.mock, \
+        response = self.send_request(
+            path=self.path, method='GET', \
+            data=json.dumps({'page': 1, 'token': self.token, 'num': 1}), \
         )
 
         self.assertTrue(is_iter(response))
@@ -70,5 +54,5 @@ class TestBlock(CommentTestBase):
         data = json.loads(''.join(response))
         self.assertIsInstance(data, list)
 
-        self._test_bad_request('/block', 'GET', {'page': -1, 'token': TEST_TOKEN, 'num': 1})
+        self._test_bad_request('/block', 'GET', {'page': -1, 'token': self.token, 'num': 1})
 

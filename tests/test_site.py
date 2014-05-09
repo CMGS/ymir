@@ -3,27 +3,14 @@
 
 import json
 import falcon
-from falcon import testing
 
-from app import app
 from tests.base import is_iter
 from tests.base import CommentTestBase
 
 class TestSite(CommentTestBase):
 
-    def setUp(self):
-        super(TestSite, self).setUp()
-        self.mock = testing.StartResponseMock()
-
     def test_add_site(self):
-        response = app(
-            testing.create_environ(
-                path='/site', \
-                method='PUT', \
-                body=json.dumps({'name': 'test'}), \
-            ), \
-            self.mock, \
-        )
+        response = self.send_request(path='/site', data=json.dumps({'name': 'test'}))
 
         self.assertTrue(is_iter(response))
         self.assertEqual(falcon.HTTP_201, self.mock.status)

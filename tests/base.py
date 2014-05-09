@@ -17,23 +17,28 @@ class CommentTestBase(testing.TestBase):
 
     def setUp(self):
         super(CommentTestBase, self).setUp()
+        self.mock = testing.StartResponseMock()
+        self.token = TEST_TOKEN
 
     def tearDown(self):
         super(CommentTestBase, self).tearDown()
 
     def _test_bad_request(self, path, method, data=None):
-        response = app(
-            testing.create_environ(
-                path=path, \
-                method=method, \
-                body=json.dumps(data or {}), \
-            ), \
-            self.mock, \
-        )
+        response = self.send_request(path, json.dumps(data or {}), method)
 
         self.assertIsInstance(response, list)
         result = json.loads(response[0])
         self.assertEqual(result['title'], config.HTTP_400)
         self.assertEqual(falcon.HTTP_400, self.mock.status)
 
+    def send_request(self, path='/', data='', method='PUT'):
+        response = app(
+            testing.create_environ(
+                path=path, \
+                method=method, \
+                body=data, \
+            ), \
+            self.mock, \
+        )
+        return response
 
