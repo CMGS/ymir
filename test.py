@@ -3,6 +3,8 @@
 
 import os
 import nose
+import logging
+
 global site
 
 def setup():
@@ -32,6 +34,8 @@ def cleanup():
 
 if __name__ == '__main__':
     try:
+        logger = logging.getLogger('peewee')
+        logger.setLevel(logging.INFO)
         setup()
         os.environ['NOSE_WITH_COVERAGE'] = '1'
         os.environ['NOSE_COVER_PACKAGE'] = os.path.dirname(__file__)
