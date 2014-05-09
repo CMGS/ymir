@@ -8,9 +8,9 @@ from falcon import testing
 
 from app import app
 from tests.base import is_iter
+from tests.base import CommentTestBase
 
-
-class TestSys(testing.TestBase):
+class TestSys(CommentTestBase):
 
     def test_get(self):
         mock = testing.StartResponseMock()
