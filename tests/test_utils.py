@@ -11,12 +11,12 @@ class TestFn(TestCase):
     def test_get_node(self):
         self.patch(fn, 'dbs_mod', 10)
         self.patch(fn, 'dbs_len', 1)
-        assert fn.get_node(1) == 0
-        assert fn.get_node(2) == 0
+        self.assertEqual(fn.get_node(1), 0)
+        self.assertEqual(fn.get_node(2), 0)
         self.patch(fn, 'dbs_mod', 10)
         self.patch(fn, 'dbs_len', 2)
-        assert fn.get_node(1) == 1
-        assert fn.get_node(4) == 0
+        self.assertEqual(fn.get_node(1), 1)
+        self.assertEqual(fn.get_node(4), 0)
 
 class TestIjson(TestCase):
 
@@ -31,5 +31,5 @@ class TestIjson(TestCase):
             self.compare(case)
 
     def compare(self, a):
-        assert ''.join(ijson.dump(a)) == json.dumps(a)
+        self.assertEqual(''.join(ijson.dump(a)), json.dumps(a))
 
