@@ -45,11 +45,7 @@ class TestComment(CommentTestBase):
         self.assertIsInstance(response, list)
         self.assertEqual(falcon.HTTP_403, self.mock.status)
 
-    def test_get_comment_no_expand(self):
-        site = get_site_by_token(self.token)
-        ncomment_1 = create(site, 10, 0, 1, '192.168.10.1', 'hello')
-        create(site, 10, ncomment_1.id, 1, '192.168.10.1', 'world')
-
+    def test_get_empty(self):
         data = {'tid':100, 'page':1, 'num':1, 'expand':0}
         response = self.send_request(
             path=self.path, method='GET', \
@@ -59,6 +55,10 @@ class TestComment(CommentTestBase):
         self.assertTrue(is_iter(response))
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(json.loads(''.join(response)))
+
+    def test_get_comment_no_expand(self):
+        site = get_site_by_token(self.token)
+        ncomment_1 = create(site, 10, 0, 1, '192.168.10.1', 'hello')
 
         data = {'tid':10, 'page':1, 'num':1, 'expand':0}
         response = self.send_request(
@@ -77,5 +77,27 @@ class TestComment(CommentTestBase):
         self.assertEqual(data['id'], ncomment_1.id)
 
     def test_get_comment_with_expand(self):
-        pass
+        site = get_site_by_token(self.token)
+        ncomment_1 = create(site, 11, 0, 1, '192.168.10.1', 'hello')
+        ncomment_2 = create(site, 11, ncomment_1.id, 1, '192.168.10.1', 'world')
+
+        data = {'tid':11, 'page':1, 'num':3, 'expand':1}
+        response = self.send_request(
+            path=self.path, method='GET', \
+            data=json.dumps(data), \
+        )
+
+        self.assertTrue(is_iter(response))
+        self.assertEqual(falcon.HTTP_200, self.mock.status)
+        result = json.loads(''.join(response))
+        self.assertTrue(result)
+
+        c1, c2 = result[0]
+        self.assertEqual(c1['ip'], ncomment_1.ip)
+        self.assertEqual(c1['content'], ncomment_1.content)
+        self.assertEqual(c1['id'], ncomment_1.id)
+
+        self.assertEqual(c2['ip'], ncomment_2.ip)
+        self.assertEqual(c2['content'], ncomment_2.content)
+        self.assertEqual(c2['id'], ncomment_2.id)
 
