@@ -3,6 +3,7 @@
 
 import falcon
 import logging
+from handlers.sys import Sys
 from handlers.comment import Comment
 from handlers.site import Site, Block
 
@@ -17,6 +18,7 @@ class HelloWorld(object):
 
 app = falcon.API()
 app.add_route('/', HelloWorld())
+app.add_route('/sys', Sys())
 app.add_route('/site', Site())
 app.add_route('/block', Block())
 app.add_route('/m/{token}', Comment())

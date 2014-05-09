@@ -7,6 +7,7 @@ import falcon
 import logging
 from collections import OrderedDict
 
+from utils import ijson
 from handlers import BaseHandler
 from query.site import get_block
 from query.comment import create, get_comments
@@ -30,7 +31,7 @@ class Comment(BaseHandler):
 
         #HEAT PROTECT
         #CACHE FOR LONG TIME
-        if get_block(site.id. ip):
+        if get_block(site.id, ip):
             logger.info('IP %s deny' % ip)
             raise falcon.HTTPForbidden(config.HTTP_403, 'ip %s deny' % ip)
 
@@ -41,7 +42,7 @@ class Comment(BaseHandler):
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'create comment failed')
 
         resp.status = falcon.HTTP_201
-        resp.body = json.dumps({'id': comment.id})
+        resp.stream = ijson.dump({'id': comment.id})
 
     def on_get(self, req, resp, token):
         site = self.get_site(token)
@@ -62,9 +63,9 @@ class Comment(BaseHandler):
         resp.status = falcon.HTTP_200
 
         if not expand:
-            resp.body = self.render_comments_without_expand(comments)
+            resp.stream = self.render_comments_without_expand(comments)
         else:
-            resp.body = self.render_comments_with_expand(comments)
+            resp.stream = self.render_comments_with_expand(comments)
 
     def render_comments_with_expand(self, comments):
         result = OrderedDict()
@@ -73,10 +74,10 @@ class Comment(BaseHandler):
                 result[comment.fid].append(self.render_comment(comment))
                 continue
             result[comment.id] = [self.render_comment(comment)]
-        return json.dumps(result.values())
+        return ijson.dump(result.values())
 
     def render_comments_without_expand(self, comments):
-        return json.dumps(
+        return ijson.dump(
             [self.render_comment(comment) for comment in comments]
         )
 
