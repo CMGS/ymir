@@ -1,5 +1,6 @@
 TODO
 ======
+[![build status](http://ci.hunantv.com/projects/14/status.png?ref=master)](http://ci.hunantv.com/projects/14?ref=master)
 
 1. 查询加缓存
   * site 可以永久存在redis中
