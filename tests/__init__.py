@@ -1,9 +1,9 @@
 #!/usr/bin/python
 #coding:utf-8
 
-DEFAULT_DBHOST = '127.0.0.1'
+DEFAULT_DBHOST = 'git.hunantv.com'
 DEFAULT_DBPORT = 3306
-DEFAULT_DBUSER = 'root'
+DEFAULT_DBUSER = 'test'
 DEFAULT_DBPASS = ''
 DEFAULT_DBNAME = 'comment_test'
 
@@ -11,9 +11,9 @@ DEFAULT_TABLE_NAME = 'comment'
 
 STORE = [
     {
-        'host':'127.0.0.1', \
+        'host':'git.hunantv.com', \
         'port':3306, \
-        'user':'root', \
+        'user':'test', \
         'password':'', \
         'database':'comment_test', \
     }, \
@@ -25,4 +25,9 @@ REDIS_DB = 0
 REDIS_PASSWORD = ''
 REDIS_POOL_SIZE = 100
 REDIS_PRFIX = 'comment_test'
+
+try:
+    from tests.local_config import *
+except ImportError:
+    pass
 
