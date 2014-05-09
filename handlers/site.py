@@ -34,7 +34,7 @@ class Site(BaseHandler):
         resp.status = falcon.HTTP_201
         resp.stream = ijson.dump({'token': site.token})
 
-class Block(object):
+class Block(BaseHandler):
 
     def on_put(self, req, resp):
         token, ip, _ = self.parse_params(req)

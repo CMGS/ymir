@@ -1,7 +1,9 @@
 #!/usr/bin/python
 #coding:utf-8
 
+import os
 import nose
+global site
 
 def setup():
     import tests
@@ -13,8 +15,12 @@ def setup():
         setattr(config, k, value)
 
     from models.site import Site, Block
+    from query.site import create
     Site.create_table(fail_silently=True)
     Block.create_table(fail_silently=True)
+    global site
+    from tests.base import TEST_TOKEN
+    site = create(TEST_TOKEN, 'test')
 
 def cleanup():
     from models.site import Site, Block
@@ -27,6 +33,8 @@ def cleanup():
 if __name__ == '__main__':
     try:
         setup()
+        os.environ['NOSE_WITH_COVERAGE'] = '1'
+        os.environ['NOSE_COVER_PACKAGE'] = os.path.dirname(__file__)
         nose.main()
     except Exception:
         raise

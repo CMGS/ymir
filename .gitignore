@@ -1,2 +1,3 @@
 *.pyc
+.coverage
 local_config.py

@@ -2,7 +2,6 @@
 #coding:utf-8
 
 import json
-import config
 import falcon
 from falcon import testing
 
@@ -12,19 +11,22 @@ from tests.base import CommentTestBase
 
 class TestSite(CommentTestBase):
 
+    def setUp(self):
+        super(TestSite, self).setUp()
+        self.mock = testing.StartResponseMock()
+
     def test_add_site(self):
-        mock = testing.StartResponseMock()
         response = app(
             testing.create_environ(
                 path='/site', \
                 method='PUT', \
                 body=json.dumps({'name': 'test'}), \
             ), \
-            mock, \
+            self.mock, \
         )
 
         self.assertTrue(is_iter(response))
-        self.assertEqual(falcon.HTTP_201, mock.status)
+        self.assertEqual(falcon.HTTP_201, self.mock.status)
         data = json.loads(''.join(response))
         self.assertIsInstance(data, dict)
         token = data.get('token')
@@ -32,17 +34,5 @@ class TestSite(CommentTestBase):
         self.assertIsInstance(token, (str, unicode))
         self.assertEqual(len(token), 32)
 
-        response = app(
-            testing.create_environ(
-                path='/site', \
-                method='PUT', \
-                body=json.dumps({}), \
-            ), \
-            mock, \
-        )
-
-        self.assertIsInstance(response, list)
-        result = json.loads(response[0])
-        self.assertEqual(result['title'], config.HTTP_400)
-        self.assertEqual(falcon.HTTP_400, mock.status)
+        self._test_bad_request('/site', 'PUT')
 
