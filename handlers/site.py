@@ -9,6 +9,7 @@ import logging
 
 from handlers import BaseHandler
 
+from utils import ijson
 from query.site import create, block, \
         delete_block, get_blocks
 
@@ -31,7 +32,7 @@ class Site(BaseHandler):
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'create site failed')
 
         resp.status = falcon.HTTP_201
-        resp.body = json.dumps({'token': site.token})
+        resp.stream = ijson.dump({'token': site.token})
 
 class Block(object):
 
@@ -46,7 +47,7 @@ class Block(object):
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'create block failed')
 
         resp.status = falcon.HTTP_201
-        resp.body = json.dumps({'id': bip.id})
+        resp.stream = ijson.dump({'id': bip.id})
 
     def on_delete(self, req, resp):
         token, id, _ = self.parse_params(req, 'id')
@@ -70,7 +71,7 @@ class Block(object):
         site = self.get_site(token)
         blocks = get_blocks(site.id, page, num)
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps([{'id':block.id, 'ip':block.ip, 'ctime':str(block.ctime)} for block in blocks])
+        resp.stream = ijson.dump([{'id':block.id, 'ip':block.ip, 'ctime':str(block.ctime)} for block in blocks])
 
     def parse_params(self, req, data='ip'):
         params = json.load(req.stream)
