@@ -5,7 +5,7 @@ TODO
   * site 可以永久存在redis中
   * block ip 同上
   * 评论列表需要刷新
-2. 遇到没有数据query层直接raise上来
+2. ~~遇到没有数据query层直接raise上来~~
 3. 过热保护
 
 4. 删除单条消息接口
