@@ -31,7 +31,7 @@ class Comment(BaseHandler):
 
         #HEAT PROTECT
         #CACHE FOR LONG TIME
-        if get_block(site.id. ip):
+        if get_block(site.id, ip):
             logger.info('IP %s deny' % ip)
             raise falcon.HTTPForbidden(config.HTTP_403, 'ip %s deny' % ip)
 
@@ -63,9 +63,9 @@ class Comment(BaseHandler):
         resp.status = falcon.HTTP_200
 
         if not expand:
-            resp.body = self.render_comments_without_expand(comments)
+            resp.stream = self.render_comments_without_expand(comments)
         else:
-            resp.body = self.render_comments_with_expand(comments)
+            resp.stream = self.render_comments_with_expand(comments)
 
     def render_comments_with_expand(self, comments):
         result = OrderedDict()

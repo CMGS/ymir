@@ -22,5 +22,7 @@ def dump(obj, skipkeys=False, ensure_ascii=True, check_circular=True,
     # could accelerate with writelines in some versions of Python, at
     # a debuggability cost
     for chunk in iterable:
+        if isinstance(chunk, unicode):
+            chunk = chunk.encode('utf8')
         yield chunk
 
