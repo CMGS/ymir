@@ -10,7 +10,8 @@ from collections import OrderedDict
 from utils import ijson
 from handlers import BaseHandler
 from query.site import get_block
-from query.comment import create, get_comments
+from query.comment import create, get_comments, \
+        delete_comment
 
 logger = logging.getLogger(__name__)
 
@@ -87,4 +88,20 @@ class Comment(CommentBase):
 
         resp.status = falcon.HTTP_200
         resp.stream = self.render_comments(comments)
+
+    def on_delete(self, req, resp, token):
+        site = self.get_site(token)
+        params = json.load(req.stream)
+
+        id = int(params.get('id', 0))
+        if not id:
+            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
+
+        try:
+            delete_comment(site, id)
+        except Exception:
+            logger.exception('delete')
+            raise falcon.HTTPInternalServerError(config.HTTP_500, 'delete comment failed')
+
+        resp.status = falcon.HTTP_200
 

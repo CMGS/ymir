@@ -9,32 +9,34 @@ from query.comment import generate
 
 @default_db.commit_on_success
 def create(token, name):
-    site = Site.create(token=token, name=name)
+    site = Site.create(token = token, name = name)
     node = get_node(site.id)
-    query = site.update(node=node)
-    query.execute()
+    site.node = node
+    site.save()
     comment_table = generate(site.id, token, node)
     comment_table.create_table()
     return site
 
 @default_db.commit_on_success
 def block(site, ip):
-    query = site.update(blocks=Site.blocks + 1)
-    query.execute()
-    return Block.create(sid=site.id, ip=ip)
+    site.blocks = Site.blocks + 1
+    site.save()
+    return Block.create(sid = site.id, ip = ip)
 
+@default_db.commit_on_success
 def delete_block(site, id):
-    q = Block.delete().where(
-            Block.id==id, Block.sid==site.id
-        )
-    return q.execute()
+    site.blocks = Site.blocks - 1
+    site.save()
+    return Block.delete().where(
+        Block.id == id, Block.sid == site.id
+    ).execute()
 
 def get_blocks(sid, page, num):
-    return Block.select().where(Block.sid==sid).paginate(page, num)
+    return Block.select().where(Block.sid == sid).paginate(page, num)
 
 def get_block(sid, ip):
-    return Block.select().where(Block.sid==sid, Block.ip==ip).first()
+    return Block.select().where(Block.sid == sid, Block.ip == ip).first()
 
 def get_site_by_token(token):
-    return Site.select().where(Site.token==token).first()
+    return Site.select().where(Site.token == token).first()
 

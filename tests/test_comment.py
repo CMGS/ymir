@@ -4,7 +4,7 @@
 import json
 import falcon
 
-from query.comment import create
+from query.comment import create, get_comment
 from query.site import block, get_site_by_token
 
 from tests.base import is_iter
@@ -17,12 +17,16 @@ class TestComment(CommentTestBase):
         self.path = '/m/%s' % self.token
 
     def test_add_comment(self):
+        site = get_site_by_token(self.token)
+        after = site.comments + 1
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
         response = self.send_request(
             path=self.path, method='PUT', \
             data=json.dumps(data), \
         )
 
+        site = get_site_by_token(self.token)
+        self.assertEqual(site.comments, after)
         self.assertTrue(is_iter(response))
         self.assertEqual(falcon.HTTP_201, self.mock.status)
         data = json.loads(''.join(response))
@@ -44,6 +48,50 @@ class TestComment(CommentTestBase):
 
         self.assertIsInstance(response, list)
         self.assertEqual(falcon.HTTP_403, self.mock.status)
+
+    def test_rm_comment(self):
+        site = get_site_by_token(self.token)
+        o1 = site.comments
+
+        ip = '192.168.101.1'
+        fc = create(site, 20, 0, 1, ip, 'hello')
+        create(site, 20, fc.id, 1, ip, 'hello')
+        create(site, 20, fc.id, 1, ip, 'hello')
+        create(site, 20, fc.id, 1, ip, 'hello')
+        d2 = create(site, 20, fc.id, 1, ip, 'hello')
+
+        site = get_site_by_token(self.token)
+        self.assertEqual(o1 + 5, site.comments)
+        o1 = site.comments
+        fc = get_comment(site.id, self.token, site.node, fc.id)
+        self.assertEqual(fc.count, 4)
+        o2 = fc.count
+
+        data = {'id': d2.id}
+        response = self.send_request(
+            path=self.path, method='DELETE', \
+            data=json.dumps(data), \
+        )
+
+        self.assertEqual(falcon.HTTP_200, self.mock.status)
+        self.assertFalse(response)
+
+        fc = get_comment(site.id, self.token, site.node, fc.id)
+        self.assertEqual(fc.count, o2 - 1)
+        site = get_site_by_token(self.token)
+        self.assertEqual(o1 - 1, site.comments)
+        o1 = site.comments
+
+        data = {'id': fc.id}
+        response = self.send_request(
+            path=self.path, method='DELETE', \
+            data=json.dumps(data), \
+        )
+
+        self.assertEqual(falcon.HTTP_200, self.mock.status)
+        self.assertFalse(response)
+        site = get_site_by_token(self.token)
+        self.assertEqual(o1 - 4, site.comments)
 
     def test_get_empty(self):
         data = {'tid':100, 'page':1, 'num':1, 'expand':0}
