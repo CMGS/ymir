@@ -19,9 +19,30 @@ class CommentBase(BaseHandler):
     def get_page_params(self, params):
         page = int(params.get('page', 0))
         num = int(params.get('num', config.DEFAULT_PAGE_NUM))
-        if page < 1 or num < 0:
+        tid = int(params.get('tid', 0))
+        if page < 1 or num < 0 or not tid:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
-        return page, num
+        return page, num, tid
+
+    def render_comments(self, comments, fid=0):
+        result = OrderedDict()
+        flag = -1
+        for comment in comments:
+            if comment.fid == fid:
+                result[comment.id] = [self.render_comment(comment)]
+                flag = comment.id
+            elif flag == comment.fid:
+                result[flag].append(self.render_comment(comment))
+        return ijson.dump(result.values())
+
+    def render_comment(self, comment):
+        return {
+                   'id':comment.id, \
+                   'content':comment.content, \
+                   'ip':comment.ip, \
+                   'ctime':str(comment.ctime), \
+                   'count':comment.count, \
+               }
 
 class Comment(CommentBase):
 
@@ -57,8 +78,7 @@ class Comment(CommentBase):
         site = self.get_site(token)
         params = json.load(req.stream)
 
-        page, num = self.get_page_params(params)
-        tid = int(params.get('tid', 0 ))
+        page, num, tid = self.get_page_params(params)
         expand = bool(params.get('expand', 0))
 
         comments = get_comments(
@@ -67,25 +87,5 @@ class Comment(CommentBase):
         )
 
         resp.status = falcon.HTTP_200
-
         resp.stream = self.render_comments(comments)
 
-    def render_comments(self, comments):
-        result = OrderedDict()
-        flag = -1
-        for comment in comments:
-            if comment.fid == 0:
-                result[comment.id] = [self.render_comment(comment)]
-                flag = comment.id
-            elif flag == comment.fid:
-                result[flag].append(self.render_comment(comment))
-        return ijson.dump(result.values())
-
-    def render_comment(self, comment):
-        return {
-                   'id':comment.id, \
-                   'content':comment.content, \
-                   'ip':comment.ip, \
-                   'ctime':str(comment.ctime), \
-                   'count':comment.count, \
-               }

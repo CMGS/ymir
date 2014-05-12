@@ -39,9 +39,9 @@ def get_comment(sid, token, node, id):
     comment_table = get_table(sid, token, node)
     return comment_table.get(comment_table.id == id)
 
-def get_comments(sid, token, node, tid, expand, page, num):
+def get_comments(sid, token, node, tid, expand, page, num, fid=0):
     comment_table = get_table(sid, token, node)
-    comments = comment_table.select().where(comment_table.tid==tid, comment_table.fid==0).paginate(page, num)
+    comments = comment_table.select().where(comment_table.tid==tid, comment_table.fid==fid).paginate(page, num)
     for comment in comments:
         yield comment
         if not expand:

@@ -6,6 +6,7 @@ import logging
 from handlers.sys import Sys
 from handlers.comment import Comment
 from handlers.site import Site, Block
+from handlers.enhance import CommentByFid
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,4 +23,5 @@ app.add_route('/sys', Sys())
 app.add_route('/site', Site())
 app.add_route('/block', Block())
 app.add_route('/m/{token}', Comment())
+app.add_route('/mf/{token}', CommentByFid())
 
