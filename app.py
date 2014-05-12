@@ -8,7 +8,7 @@ from handlers.comment import Comment
 from handlers.site import Site, Block
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 class HelloWorld(object):

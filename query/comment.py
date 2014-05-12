@@ -33,7 +33,15 @@ def create(site, tid, fid, uid, ip, content):
 
 def get_comments(sid, token, node, tid, expand, page, num):
     comment_table = get_table(sid, token, node)
-    if not expand:
-        return comment_table.select().where(comment_table.tid==tid, comment_table.fid==0).paginate(page, num)
-    return comment_table.select().where(comment_table.tid==tid).paginate(page, num)
+    comments = comment_table.select().where(comment_table.tid==tid, comment_table.fid==0).paginate(page, num)
+    for comment in comments:
+        yield comment
+        if not expand:
+            continue
+        for reply in get_reply_comments(sid, token, node, tid, comment.id, page, num):
+            yield reply
+
+def get_reply_comments(sid, token, node, tid, fid, page, num):
+    comment_table = get_table(sid, token, node)
+    return comment_table.select().where(comment_table.tid==tid, comment_table.fid==fid).paginate(page, num)
 
