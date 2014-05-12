@@ -29,7 +29,15 @@ def create(site, tid, fid, uid, ip, content):
         site.comments = Site.comments + 1
         site.save()
         comment = comment_table.create(tid=tid, fid=fid, uid=uid, ip=ip, content=content)
+        if fid != 0:
+            f_comment = get_comment(site.id, site.token, site.node, fid)
+            f_comment.count = comment_table.count + 1
+            f_comment.save()
     return comment
+
+def get_comment(sid, token, node, id):
+    comment_table = get_table(sid, token, node)
+    return comment_table.get(comment_table.id == id)
 
 def get_comments(sid, token, node, tid, expand, page, num):
     comment_table = get_table(sid, token, node)

@@ -57,10 +57,6 @@ class Comment(CommentBase):
         site = self.get_site(token)
         params = json.load(req.stream)
 
-        page = int(params.get('page', 0))
-        if page < 1:
-            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
-        num = int(params.get('num', config.DEFAULT_PAGE_NUM))
         page, num = self.get_page_params(params)
         tid = int(params.get('tid', 0 ))
         expand = bool(params.get('expand', 0))
@@ -91,4 +87,5 @@ class Comment(CommentBase):
                    'content':comment.content, \
                    'ip':comment.ip, \
                    'ctime':str(comment.ctime), \
+                   'count':comment.count, \
                }
