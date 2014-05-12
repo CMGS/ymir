@@ -6,9 +6,10 @@ import logging
 from handlers.sys import Sys
 from handlers.comment import Comment
 from handlers.site import Site, Block
+from handlers.enhance import CommentByFid, CommentByIP
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 class HelloWorld(object):
@@ -22,4 +23,6 @@ app.add_route('/sys', Sys())
 app.add_route('/site', Site())
 app.add_route('/block', Block())
 app.add_route('/m/{token}', Comment())
+app.add_route('/mp/{token}', CommentByIP())
+app.add_route('/mf/{token}', CommentByFid())
 

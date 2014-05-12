@@ -14,7 +14,36 @@ from query.comment import create, get_comments
 
 logger = logging.getLogger(__name__)
 
-class Comment(BaseHandler):
+class CommentBase(BaseHandler):
+
+    def get_page_params(self, params):
+        page = int(params.get('page', 0))
+        num = int(params.get('num', config.DEFAULT_PAGE_NUM))
+        tid = int(params.get('tid', 0))
+        if page < 1 or num < 0 or not tid:
+            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
+        return page, num, tid
+
+    def render_comments(self, comments, fid=0):
+        result = OrderedDict()
+        for comment in comments:
+            if comment.fid == fid:
+                result[comment.id] = [self.render_comment(comment)]
+            else:
+                result[comment.fid].append(self.render_comment(comment))
+        return ijson.dump(result.values())
+
+    def render_comment(self, comment):
+        return {
+                    'tid': comment.tid, \
+                    'id':comment.id, \
+                    'content':comment.content, \
+                    'ip':comment.ip, \
+                    'ctime':str(comment.ctime), \
+                    'count':comment.count, \
+               }
+
+class Comment(CommentBase):
 
     def on_put(self, req, resp, token):
         site = self.get_site(token)
@@ -48,11 +77,7 @@ class Comment(BaseHandler):
         site = self.get_site(token)
         params = json.load(req.stream)
 
-        page = int(params.get('page', 0))
-        tid = int(params.get('tid', 0 ))
-        if page < 1:
-            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
-        num = int(params.get('num', config.DEFAULT_PAGE_NUM))
+        page, num, tid = self.get_page_params(params)
         expand = bool(params.get('expand', 0))
 
         comments = get_comments(
@@ -61,31 +86,5 @@ class Comment(BaseHandler):
         )
 
         resp.status = falcon.HTTP_200
+        resp.stream = self.render_comments(comments)
 
-        if not expand:
-            resp.stream = self.render_comments_without_expand(comments)
-        else:
-            resp.stream = self.render_comments_with_expand(comments)
-
-    def render_comments_with_expand(self, comments):
-        result = OrderedDict()
-        for comment in comments:
-            if comment.fid and result.get(comment.fid):
-                result[comment.fid].append(self.render_comment(comment))
-                continue
-            result[comment.id] = [self.render_comment(comment)]
-        return ijson.dump(result.values())
-
-    def render_comments_without_expand(self, comments):
-        return ijson.dump(
-            [self.render_comment(comment) for comment in comments]
-        )
-
-
-    def render_comment(self, comment):
-        return {
-                   'id':comment.id, \
-                   'content':comment.content, \
-                   'ip':comment.ip, \
-                   'ctime':str(comment.ctime), \
-               }

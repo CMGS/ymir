@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #coding:utf-8
 
-import falcon
 from utils.fn import get_node
 from common import default_db
 from models.site import Site, Block

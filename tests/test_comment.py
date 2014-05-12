@@ -71,7 +71,7 @@ class TestComment(CommentTestBase):
         result = json.loads(''.join(response))
         self.assertTrue(result)
 
-        data = result[0]
+        data = result[0][0]
         self.assertEqual(data['ip'], ncomment_1.ip)
         self.assertEqual(data['content'], ncomment_1.content)
         self.assertEqual(data['id'], ncomment_1.id)

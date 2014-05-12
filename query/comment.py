@@ -29,11 +29,35 @@ def create(site, tid, fid, uid, ip, content):
         site.comments = Site.comments + 1
         site.save()
         comment = comment_table.create(tid=tid, fid=fid, uid=uid, ip=ip, content=content)
+        if fid != 0:
+            f_comment = get_comment(site.id, site.token, site.node, fid)
+            f_comment.count = comment_table.count + 1
+            f_comment.save()
     return comment
 
-def get_comments(sid, token, node, tid, expand, page, num):
+def get_comments_by_ip(sid, token, node, ip, tid=-1):
     comment_table = get_table(sid, token, node)
-    if not expand:
-        return comment_table.select().where(comment_table.tid==tid, comment_table.fid==0).paginate(page, num)
-    return comment_table.select().where(comment_table.tid==tid).paginate(page, num)
+    if tid == -1:
+        comments = comment_table.select().where(comment_table.ip==ip)
+    else:
+        comments = comment_table.select().where(comment_table.tid==tid, comment_table.ip==ip)
+    return comments
+
+def get_comment(sid, token, node, id):
+    comment_table = get_table(sid, token, node)
+    return comment_table.get(comment_table.id == id)
+
+def get_comments(sid, token, node, tid, expand, page, num, fid=0):
+    comment_table = get_table(sid, token, node)
+    comments = comment_table.select().where(comment_table.tid==tid, comment_table.fid==fid).paginate(page, num)
+    for comment in comments:
+        yield comment
+        if not expand:
+            continue
+        for reply in get_reply_comments(sid, token, node, tid, comment.id, page, num):
+            yield reply
+
+def get_reply_comments(sid, token, node, tid, fid, page, num):
+    comment_table = get_table(sid, token, node)
+    return comment_table.select().where(comment_table.tid==tid, comment_table.fid==fid).paginate(page, num)
 
