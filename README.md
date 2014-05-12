@@ -16,7 +16,7 @@ TODO
 7. 删除基于 ip 消息接口
 
 8. ~~获取 fid 消息接口~~
-9. 获取 ip 消息接口
+9. ~~获取 ip 消息接口~~
 
 10. 测试 CommentByFid CommentByIP
 11. 获取评论缓存设计

@@ -8,7 +8,7 @@ import logging
 
 from utils import ijson
 from handlers.comment import CommentBase
-from query.comment import get_comments, get_comments_by_ip
+from query.comment import get_comments_by_fid, get_comments_by_ip
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +21,13 @@ class CommentByFid(CommentBase):
         page, num, tid = self.get_page_params(params)
         fid = int(params.get('fid', 0))
 
-        comments = get_comments(
+        comments = get_comments_by_fid(
             site.id, site.token, site.node, \
-            tid, 0, page, num, fid=fid, \
+            tid, fid, page, num, \
         )
 
         resp.status = falcon.HTTP_200
-        resp.stream = self.render_comments(comments, fid=fid)
+        resp.stream = ijson.dump([self.render_comment(comment) for comment in comments])
 
 class CommentByIP(CommentBase):
 
