@@ -18,7 +18,7 @@ TODO
 8. ~~获取 fid 消息接口~~
 9. ~~获取 ip 消息接口~~
 
-10. 测试 CommentByFid CommentByIP
+10. ~~测试 CommentByFid CommentByIP~~
 11. 获取评论缓存设计
 12. ~~获取评论跟帖设计~~
 
