@@ -35,6 +35,14 @@ def create(site, tid, fid, uid, ip, content):
             f_comment.save()
     return comment
 
+def get_comments_by_ip(sid, token, node, ip, tid=-1):
+    comment_table = get_table(sid, token, node)
+    if tid == -1:
+        comments = comment_table.select().where(comment_table.ip==ip)
+    else:
+        comments = comment_table.select().where(comment_table.tid==tid, comment_table.ip==ip)
+    return comments
+
 def get_comment(sid, token, node, id):
     comment_table = get_table(sid, token, node)
     return comment_table.get(comment_table.id == id)

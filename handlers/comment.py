@@ -26,22 +26,21 @@ class CommentBase(BaseHandler):
 
     def render_comments(self, comments, fid=0):
         result = OrderedDict()
-        flag = -1
         for comment in comments:
             if comment.fid == fid:
                 result[comment.id] = [self.render_comment(comment)]
-                flag = comment.id
-            elif flag == comment.fid:
-                result[flag].append(self.render_comment(comment))
+            else:
+                result[comment.fid].append(self.render_comment(comment))
         return ijson.dump(result.values())
 
     def render_comment(self, comment):
         return {
-                   'id':comment.id, \
-                   'content':comment.content, \
-                   'ip':comment.ip, \
-                   'ctime':str(comment.ctime), \
-                   'count':comment.count, \
+                    'tid': comment.tid, \
+                    'id':comment.id, \
+                    'content':comment.content, \
+                    'ip':comment.ip, \
+                    'ctime':str(comment.ctime), \
+                    'count':comment.count, \
                }
 
 class Comment(CommentBase):
