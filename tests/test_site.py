@@ -7,9 +7,12 @@ import falcon
 from tests.base import is_iter
 from tests.base import CommentTestBase
 
+def fake_create(*args, **kwargs):
+    raise Exception('this is test')
+
 class TestSite(CommentTestBase):
 
-    def test_add_site(self):
+    def test_create_site(self):
         response = self.send_request(path='/site', data=json.dumps({'name': 'test'}))
 
         self.assertTrue(is_iter(response))
@@ -22,4 +25,11 @@ class TestSite(CommentTestBase):
         self.assertEqual(len(token), 32)
 
         self._test_bad_request('/site', 'PUT')
+
+    def test_create_500(self):
+        from handlers import site
+        self.patch(site, 'create', fake_create)
+
+        self.send_request(path='/site', data=json.dumps({'name': 'test'}))
+        self.assertEqual(falcon.HTTP_500, self.mock.status)
 
