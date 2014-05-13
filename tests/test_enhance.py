@@ -26,8 +26,17 @@ class TestEnhance(TestBase):
             path = '/mp/%s' % self.token, method = 'GET', \
             data = json.dumps(data), \
         )
-
         self.check(response)
+
+        data = {'ip': ip, 'tid': 20}
+        response = self.send_request(
+            path = '/mp/%s' % self.token, method = 'GET', \
+            data = json.dumps(data), \
+        )
+        self.check(response)
+
+    def test_get_comments_by_ip_400(self):
+        self._test_bad_request('/mp/%s' % self.token, 'GET')
 
     def test_get_comments_by_fid(self):
         site = get_site_by_token(self.token)
@@ -51,7 +60,14 @@ class TestEnhance(TestBase):
         self.assertTrue(result)
         self.assertIsInstance(result, list)
 
-        rcomment_1, rcomment_2 = result
-        self.assertTrue(rcomment_1['content'], 'hello')
-        self.assertTrue(rcomment_2['content'], 'world')
+        self.check_comment(result)
+
+    def check_comment(self, result):
+        if len(result) == 2:
+            rcomment_1, rcomment_2 = result
+            self.assertTrue(rcomment_1['content'], 'hello')
+            self.assertTrue(rcomment_2['content'], 'world')
+            return
+
+        self.assertTrue(result[0]['content'], 'hello')
 

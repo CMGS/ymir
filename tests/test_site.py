@@ -6,9 +6,7 @@ import falcon
 
 from tests.base import is_iter
 from tests.base import TestBase
-
-def fake_create(*args, **kwargs):
-    raise Exception('this is test')
+from tests.base import fake_func
 
 class TestSite(TestBase):
 
@@ -30,7 +28,7 @@ class TestSite(TestBase):
 
     def test_create_500(self):
         from handlers import site
-        self.patch(site, 'create', fake_create)
+        self.patch(site, 'create', fake_func)
 
         self.send_request(path = '/site', data = json.dumps({'name': 'test'}))
         self.assertEqual(falcon.HTTP_500, self.mock.status)

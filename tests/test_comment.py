@@ -10,6 +10,7 @@ from query.site import block, get_site_by_token
 
 from tests.base import is_iter
 from tests.base import TestBase
+from tests.base import fake_func
 
 class TestComment(TestBase):
 
@@ -107,6 +108,22 @@ class TestComment(TestBase):
         self.assertFalse(response)
         site = get_site_by_token(self.token)
         self.assertEqual(o1 - 4, site.comments)
+
+    def test_delete_400(self):
+        self._test_bad_request(self.path, 'DELETE')
+
+    def test_delete_500(self):
+        site = get_site_by_token(self.token)
+        fc = create(site, 20, 0, 1, '192.168.101.2', 'hello')
+        from handlers import comment
+        self.patch(comment, 'delete_comment', fake_func)
+
+        self.send_request(
+            path = self.path, \
+            data = json.dumps({'id': fc.id}), \
+            method = 'DELETE'
+        )
+        self.assertEqual(falcon.HTTP_500, self.mock.status)
 
     def test_get_empty(self):
         data = {'tid':100, 'page':1, 'num':1, 'expand':0}

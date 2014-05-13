@@ -13,6 +13,9 @@ TEST_TOKEN = 'test_token'
 def is_iter(o):
     return isinstance(o, types.GeneratorType)
 
+def fake_func(*args, **kwargs):
+    raise Exception('this is test')
+
 class TestBase(testing.TestBase):
 
     def setUp(self):
