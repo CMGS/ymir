@@ -12,7 +12,7 @@ class TestSys(TestBase):
 
     def test_get_sys_info(self):
         response = self.send_request(
-                path='/sys', method='GET', \
+            path = '/sys', method = 'GET', \
         )
 
         self.assertTrue(is_iter(response))

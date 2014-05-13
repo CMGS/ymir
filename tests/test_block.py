@@ -19,8 +19,8 @@ class TestBlock(TestBase):
         site = get_site_by_token(self.token)
         after = site.blocks + 1
         response = self.send_request(
-            path=self.path, method='PUT', \
-            data=json.dumps({'ip': '192.168.1.1', 'token': self.token}), \
+            path = self.path, method = 'PUT', \
+            data = json.dumps({'ip': '192.168.1.1', 'token': self.token}), \
         )
 
         site = get_site_by_token(self.token)
@@ -41,8 +41,8 @@ class TestBlock(TestBase):
         nblock = block(site, '192.168.1.1')
 
         response = self.send_request(
-            path=self.path, method='DELETE', \
-            data=json.dumps({'id': nblock.id, 'token': self.token}), \
+            path = self.path, method = 'DELETE', \
+            data = json.dumps({'id': nblock.id, 'token': self.token}), \
         )
 
         site = get_site_by_token(self.token)
@@ -52,8 +52,8 @@ class TestBlock(TestBase):
 
     def test_get_block(self):
         response = self.send_request(
-            path=self.path, method='GET', \
-            data=json.dumps({'page': 1, 'token': self.token, 'num': 1}), \
+            path = self.path, method='GET', \
+            data = json.dumps({'page': 1, 'token': self.token, 'num': 1}), \
         )
 
         self.assertTrue(is_iter(response))

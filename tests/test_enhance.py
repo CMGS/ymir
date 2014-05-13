@@ -23,8 +23,8 @@ class TestEnhance(TestBase):
 
         data = {'ip': ip}
         response = self.send_request(
-            path='/mp/%s' % self.token, method='GET', \
-            data=json.dumps(data), \
+            path = '/mp/%s' % self.token, method = 'GET', \
+            data = json.dumps(data), \
         )
 
         self.check(response)
@@ -38,8 +38,8 @@ class TestEnhance(TestBase):
 
         data = {'tid': 30, 'fid': f_comment.id, 'page':1, 'num':2}
         response = self.send_request(
-            path='/mf/%s' % self.token, method='GET', \
-            data=json.dumps(data), \
+            path = '/mf/%s' % self.token, method = 'GET', \
+            data = json.dumps(data), \
         )
 
         self.check(response)

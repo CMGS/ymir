@@ -4,6 +4,7 @@
 import json
 import falcon
 
+from query import comment
 from query.comment import create, get_comment
 from query.site import block, get_site_by_token
 
@@ -16,13 +17,27 @@ class TestComment(TestBase):
         super(TestComment, self).setUp()
         self.path = '/m/%s' % self.token
 
+    def test_get_table(self):
+        comment.local = {}
+        comment_table = comment.get_table(1, self.token, 0)
+        self.assertEqual(comment.local.get(self.token), comment_table)
+
+    def test_fake_site(self):
+        data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
+        self.send_request(
+            path = '/m/123', method = 'PUT', \
+            data = json.dumps(data), \
+        )
+
+        self.assertEqual(falcon.HTTP_404, self.mock.status)
+
     def test_create_comment(self):
         site = get_site_by_token(self.token)
         after = site.comments + 1
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
         response = self.send_request(
-            path=self.path, method='PUT', \
-            data=json.dumps(data), \
+            path = self.path, method = 'PUT', \
+            data = json.dumps(data), \
         )
 
         site = get_site_by_token(self.token)
@@ -42,8 +57,8 @@ class TestComment(TestBase):
         block(site, '192.168.9.1')
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.9.1', 'content':'Hello World'}
         response = self.send_request(
-            path=self.path, method='PUT', \
-            data=json.dumps(data), \
+            path = self.path, method = 'PUT', \
+            data = json.dumps(data), \
         )
 
         self.assertIsInstance(response, list)
@@ -69,8 +84,8 @@ class TestComment(TestBase):
 
         data = {'id': d2.id}
         response = self.send_request(
-            path=self.path, method='DELETE', \
-            data=json.dumps(data), \
+            path = self.path, method = 'DELETE', \
+            data = json.dumps(data), \
         )
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
@@ -84,8 +99,8 @@ class TestComment(TestBase):
 
         data = {'id': fc.id}
         response = self.send_request(
-            path=self.path, method='DELETE', \
-            data=json.dumps(data), \
+            path = self.path, method = 'DELETE', \
+            data = json.dumps(data), \
         )
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
@@ -96,8 +111,8 @@ class TestComment(TestBase):
     def test_get_empty(self):
         data = {'tid':100, 'page':1, 'num':1, 'expand':0}
         response = self.send_request(
-            path=self.path, method='GET', \
-            data=json.dumps(data), \
+            path = self.path, method = 'GET', \
+            data = json.dumps(data), \
         )
 
         self.assertTrue(is_iter(response))
@@ -110,8 +125,8 @@ class TestComment(TestBase):
 
         data = {'tid':10, 'page':1, 'num':1, 'expand':0}
         response = self.send_request(
-            path=self.path, method='GET', \
-            data=json.dumps(data), \
+            path = self.path, method = 'GET', \
+            data = json.dumps(data), \
         )
 
         self.assertTrue(is_iter(response))
@@ -131,8 +146,8 @@ class TestComment(TestBase):
 
         data = {'tid':11, 'page':1, 'num':3, 'expand':1}
         response = self.send_request(
-            path=self.path, method='GET', \
-            data=json.dumps(data), \
+            path = self.path, method = 'GET', \
+            data = json.dumps(data), \
         )
 
         self.assertTrue(is_iter(response))

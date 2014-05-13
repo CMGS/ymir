@@ -2,6 +2,7 @@
 #coding:utf-8
 
 import os
+import sys
 import nose
 import logging
 
@@ -32,13 +33,27 @@ def cleanup():
     for k, v in local.iteritems():
         v.drop_table(fail_silently=True)
 
+def generate_path():
+    block = ['init', 'test']
+    path = os.path.realpath(os.path.dirname(__file__))
+    for path in os.listdir(path):
+        if not path.startswith('.') \
+            and not path.startswith('__') \
+            and (os.path.isdir(path) or path.endswith('py')):
+
+            if path.endswith('py'):
+                path = path.split('.py')[0]
+            if path in block:
+                continue
+            yield path
+
 if __name__ == '__main__':
     try:
         logger = logging.getLogger('peewee')
         logger.setLevel(logging.INFO)
         setup()
-        os.environ['NOSE_WITH_COVERAGE'] = '1'
-        os.environ['NOSE_COVER_PACKAGE'] = os.path.dirname(__file__)
+        sys.argv.append('--with-coverage')
+        sys.argv.extend(['--cover-package=%s' % path for path in generate_path()])
         nose.main()
     except Exception:
         raise

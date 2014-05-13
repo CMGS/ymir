@@ -13,7 +13,9 @@ def fake_create(*args, **kwargs):
 class TestSite(TestBase):
 
     def test_create_site(self):
-        response = self.send_request(path='/site', data=json.dumps({'name': 'test'}))
+        response = self.send_request(
+            path = '/site', data = json.dumps({'name': 'test'})
+        )
 
         self.assertTrue(is_iter(response))
         self.assertEqual(falcon.HTTP_201, self.mock.status)
@@ -30,6 +32,6 @@ class TestSite(TestBase):
         from handlers import site
         self.patch(site, 'create', fake_create)
 
-        self.send_request(path='/site', data=json.dumps({'name': 'test'}))
+        self.send_request(path = '/site', data = json.dumps({'name': 'test'}))
         self.assertEqual(falcon.HTTP_500, self.mock.status)
 

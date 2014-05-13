@@ -14,9 +14,9 @@ class TestFn(TestCase):
         self.assertEqual(fn.get_node(1), 0)
         self.assertEqual(fn.get_node(2), 0)
         self.patch(fn, 'dbs_mod', 10)
-        self.patch(fn, 'dbs_len', 2)
-        self.assertEqual(fn.get_node(1), 1)
-        self.assertEqual(fn.get_node(4), 0)
+        self.patch(fn, 'dbs_len', 9)
+        self.assertEqual(fn.get_node(77), 7)
+        self.assertEqual(fn.get_node(23), 3)
 
 class TestIjson(TestCase):
 

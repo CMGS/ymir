@@ -7,7 +7,7 @@ from tests.base import TestBase
 class TestApp(TestBase):
 
     def test_app_index(self):
-        response = self.send_request(method='GET')
+        response = self.send_request(method = 'GET')
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertIsInstance(response, list)
