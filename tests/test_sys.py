@@ -4,16 +4,16 @@
 import json
 import config
 import falcon
-from falcon import testing
 
-from app import app
 from tests.base import is_iter
 from tests.base import CommentTestBase
 
 class TestSys(CommentTestBase):
 
-    def test_get(self):
-        response = app(testing.create_environ(path='/sys'), self.mock)
+    def test_get_sys_info(self):
+        response = self.send_request(
+                path='/sys', method='GET', \
+        )
 
         self.assertTrue(is_iter(response))
         self.assertEqual(falcon.HTTP_200, self.mock.status)
