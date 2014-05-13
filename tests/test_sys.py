@@ -6,9 +6,9 @@ import config
 import falcon
 
 from tests.base import is_iter
-from tests.base import CommentTestBase
+from tests.base import TestBase
 
-class TestSys(CommentTestBase):
+class TestSys(TestBase):
 
     def test_get_sys_info(self):
         response = self.send_request(

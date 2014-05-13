@@ -5,12 +5,12 @@ import json
 import falcon
 
 from tests.base import is_iter
-from tests.base import CommentTestBase
+from tests.base import TestBase
 
 def fake_create(*args, **kwargs):
     raise Exception('this is test')
 
-class TestSite(CommentTestBase):
+class TestSite(TestBase):
 
     def test_create_site(self):
         response = self.send_request(path='/site', data=json.dumps({'name': 'test'}))

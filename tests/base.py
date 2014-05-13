@@ -13,15 +13,15 @@ TEST_TOKEN = 'test_token'
 def is_iter(o):
     return isinstance(o, types.GeneratorType)
 
-class CommentTestBase(testing.TestBase):
+class TestBase(testing.TestBase):
 
     def setUp(self):
-        super(CommentTestBase, self).setUp()
+        super(TestBase, self).setUp()
         self.mock = testing.StartResponseMock()
         self.token = TEST_TOKEN
 
     def tearDown(self):
-        super(CommentTestBase, self).tearDown()
+        super(TestBase, self).tearDown()
 
     def _test_bad_request(self, path, method, data=None):
         response = self.send_request(path, json.dumps(data or {}), method)

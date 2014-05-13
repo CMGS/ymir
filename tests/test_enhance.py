@@ -8,9 +8,9 @@ from query.comment import create
 from query.site import get_site_by_token
 
 from tests.base import is_iter
-from tests.base import CommentTestBase
+from tests.base import TestBase
 
-class TestEnhance(CommentTestBase):
+class TestEnhance(TestBase):
 
     def setUp(self):
         super(TestEnhance, self).setUp()

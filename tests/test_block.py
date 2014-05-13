@@ -7,15 +7,15 @@ import falcon
 from query.site import block, get_site_by_token
 
 from tests.base import is_iter
-from tests.base import CommentTestBase
+from tests.base import TestBase
 
-class TestBlock(CommentTestBase):
+class TestBlock(TestBase):
 
     def setUp(self):
         super(TestBlock, self).setUp()
         self.path = '/block'
 
-    def test_add_block(self):
+    def test_create_block(self):
         site = get_site_by_token(self.token)
         after = site.blocks + 1
         response = self.send_request(
@@ -35,7 +35,7 @@ class TestBlock(CommentTestBase):
 
         self._test_bad_request(self.path, 'PUT')
 
-    def test_rm_block(self):
+    def test_delete_block(self):
         site = get_site_by_token(self.token)
         after = site.blocks
         nblock = block(site, '192.168.1.1')

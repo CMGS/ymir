@@ -8,15 +8,15 @@ from query.comment import create, get_comment
 from query.site import block, get_site_by_token
 
 from tests.base import is_iter
-from tests.base import CommentTestBase
+from tests.base import TestBase
 
-class TestComment(CommentTestBase):
+class TestComment(TestBase):
 
     def setUp(self):
         super(TestComment, self).setUp()
         self.path = '/m/%s' % self.token
 
-    def test_add_comment(self):
+    def test_create_comment(self):
         site = get_site_by_token(self.token)
         after = site.comments + 1
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
@@ -37,7 +37,7 @@ class TestComment(CommentTestBase):
 
         self._test_bad_request(self.path, 'PUT', {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.1.1',})
 
-    def test_add_comment_deny(self):
+    def test_create_comment_deny(self):
         site = get_site_by_token(self.token)
         block(site, '192.168.9.1')
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.9.1', 'content':'Hello World'}
@@ -49,7 +49,7 @@ class TestComment(CommentTestBase):
         self.assertIsInstance(response, list)
         self.assertEqual(falcon.HTTP_403, self.mock.status)
 
-    def test_rm_comment(self):
+    def test_delete_comment(self):
         site = get_site_by_token(self.token)
         o1 = site.comments
 

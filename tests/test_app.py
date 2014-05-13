@@ -2,11 +2,11 @@
 #coding:utf-8
 
 import falcon
-from tests.base import CommentTestBase
+from tests.base import TestBase
 
-class TestApp(CommentTestBase):
+class TestApp(TestBase):
 
-    def test_app(self):
+    def test_app_index(self):
         response = self.send_request(method='GET')
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
