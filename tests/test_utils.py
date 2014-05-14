@@ -26,6 +26,7 @@ class TestIjson(TestCase):
             {'a': 1, 'b': 2}, \
             [1, 2, 3, 4, 5], \
             [1, 2, 'a', {'b': 'x'}], \
+            {u'123': u'bbbb' }, \
         ]
         for case in cases:
             self.compare(case)

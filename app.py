@@ -7,6 +7,8 @@ from handlers.sys import Sys
 from handlers.comment import Comment
 from handlers.site import Site, Block
 from handlers.enhance import CommentByFid, CommentByIP
+from handlers.delete import DeleteCommentByIP, DeleteCommentByTid, \
+        DeleteCommentByFid
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -25,4 +27,7 @@ app.add_route('/block', Block())
 app.add_route('/m/{token}', Comment())
 app.add_route('/mp/{token}', CommentByIP())
 app.add_route('/mf/{token}', CommentByFid())
+app.add_route('/dp/{token}', DeleteCommentByIP())
+app.add_route('/dt/{token}', DeleteCommentByTid())
+app.add_route('/df/{token}', DeleteCommentByFid())
 

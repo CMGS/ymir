@@ -85,5 +85,8 @@ class TestBlock(TestBase):
         data = json.loads(''.join(response))
         self.assertIsInstance(data, list)
 
-        self._test_bad_request('/block', 'GET', {'page': -1, 'num': 1})
+    def test_get_block_400(self):
+        data = {'page': -1, 'token': self.token, 'num': 1}
+        self._test_bad_request(self.path, 'GET', data = data)
+        self._test_bad_request(self.path, 'GET', {'page': -1, 'num': 1})
 
