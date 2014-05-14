@@ -5,8 +5,8 @@ import json
 import falcon
 
 from query import comment
-from query.comment import create, get_comment
 from query.site import block, get_site_by_token
+from query.comment import create, get_comment, cross_transactions
 
 from tests.base import is_iter
 from tests.base import TestBase
@@ -64,6 +64,18 @@ class TestComment(TestBase):
 
         self.assertIsInstance(response, list)
         self.assertEqual(falcon.HTTP_403, self.mock.status)
+
+    def test_create_comment_500(self):
+        data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.9.2', 'content':'Hello World'}
+        from handlers import comment
+        self.patch(comment, 'create', cross_transactions(fake_func))
+
+        self.send_request(
+            path = self.path, method = 'PUT', \
+            data = json.dumps(data), \
+        )
+
+        self.assertEqual(falcon.HTTP_500, self.mock.status)
 
     def test_delete_comment(self):
         site = get_site_by_token(self.token)
@@ -135,6 +147,9 @@ class TestComment(TestBase):
         self.assertTrue(is_iter(response))
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(json.loads(''.join(response)))
+
+    def test_get_comment_400(self):
+        self._test_bad_request(self.path, 'GET')
 
     def test_get_comment_no_expand(self):
         site = get_site_by_token(self.token)

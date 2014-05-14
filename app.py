@@ -6,7 +6,8 @@ import logging
 from handlers.sys import Sys
 from handlers.comment import Comment
 from handlers.site import Site, Block
-from handlers.enhance import CommentByFid, CommentByIP, DeleteCommentByIP
+from handlers.delete import DeleteCommentByIP
+from handlers.enhance import CommentByFid, CommentByIP
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

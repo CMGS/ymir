@@ -29,10 +29,7 @@ class TestEnhanceDelete(TestBase):
         create(site, 23, 0, 1, '127.0.0.3', 'hi')
 
         data = {'ip': '127.0.0.2'}
-        response = self.send_request(
-            path = self.delete_by_ip_path, method = 'DELETE', \
-            data = json.dumps(data), \
-        )
+        response = self.request_delete_by_ip(data)
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
@@ -42,10 +39,7 @@ class TestEnhanceDelete(TestBase):
         self.assertEqual(fc_update.count, 0)
 
         data = {'ip': '127.0.0.3', 'tid': 23}
-        response = self.send_request(
-            path = self.delete_by_ip_path, method = 'DELETE', \
-            data = json.dumps(data), \
-        )
+        response = self.request_delete_by_ip(data)
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
@@ -54,10 +48,7 @@ class TestEnhanceDelete(TestBase):
 
         site = get_site_by_token(self.token)
         data = {'ip': '127.0.0.3'}
-        response = self.send_request(
-            path = self.delete_by_ip_path, method = 'DELETE', \
-            data = json.dumps(data), \
-        )
+        response = self.request_delete_by_ip(data)
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
         site_update = get_site_by_token(self.token)
@@ -69,13 +60,12 @@ class TestEnhanceDelete(TestBase):
     def test_delete_comment_by_ip_500(self):
         site = get_site_by_token(self.token)
         create(site, 24, 0, 1, '127.0.0.5', 'hello')
-        from handlers import enhance
-        self.patch(enhance, 'delete_comment', fake_func)
+        from handlers import delete
+        self.patch(delete, 'delete_comment', fake_func)
 
-        self.send_request(
-            path = self.delete_by_ip_path, \
-            data = json.dumps({'ip': '127.0.0.5'}), \
-            method = 'DELETE'
-        )
+        self.request_delete_by_ip({'ip': '127.0.0.5'})
         self.assertEqual(falcon.HTTP_500, self.mock.status)
+
+    def request_delete_by_ip(self, data):
+        return self.send_request(path = self.delete_by_ip_path, method = 'DELETE', data = json.dumps(data))
 
