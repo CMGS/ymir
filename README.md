@@ -2,9 +2,9 @@ TODO
 ======
 [![build status](http://ci.hunantv.com/projects/14/status.png?ref=master)](http://ci.hunantv.com/projects/14?ref=master)
 
-1. 查询加缓存
-  * site 可以永久存在redis中
-  * block ip 同上
+1. 查询缓存
+  * ~site 存于进程内存中~
+  * block ip 进 cache backend
   * 评论列表需要刷新
 2. ~~遇到没有数据query层直接raise上来~~
 3. 过热保护
@@ -32,4 +32,4 @@ TODO
     * ~cross transaction~
     * ~测试重命名~
     * ~500/404测试~
-
+17. 日志收集

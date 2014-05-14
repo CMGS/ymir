@@ -7,6 +7,8 @@ from models.site import Site, Block
 
 from query.comment import generate
 
+site_cache = {}
+
 @default_db.commit_on_success
 def create(token, name):
     site = Site.create(token = token, name = name)
@@ -15,6 +17,7 @@ def create(token, name):
     site.save()
     comment_table = generate(site.id, token, node)
     comment_table.create_table()
+    site_cache[token] = site
     return site
 
 @default_db.commit_on_success
@@ -38,5 +41,9 @@ def get_block(sid, ip):
     return Block.select().where(Block.sid == sid, Block.ip == ip).first()
 
 def get_site_by_token(token):
-    return Site.select().where(Site.token == token).first()
+    site = site_cache.get(token, None)
+    if not site:
+        site = Site.select().where(Site.token == token).first()
+        site_cache[token] = site
+    return site
 
