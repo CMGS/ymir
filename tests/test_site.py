@@ -4,6 +4,7 @@
 import json
 import falcon
 
+from handlers import site
 from tests.base import is_iter
 from tests.base import TestBase
 from tests.base import fake_func
@@ -27,7 +28,6 @@ class TestSite(TestBase):
         self._test_bad_request('/site', 'PUT')
 
     def test_create_500(self):
-        from handlers import site
         self.patch(site, 'create', fake_func)
 
         self.send_request(path = '/site', data = json.dumps({'name': 'test'}))

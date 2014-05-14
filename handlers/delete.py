@@ -7,6 +7,7 @@ import config
 import logging
 
 from handlers import BaseHandler
+from query.comment import delete_comments_by_tid
 from query.comment import delete_comment, get_comments_by_ip
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,24 @@ class DeleteCommentByIP(BaseHandler):
                 delete_comment(site, comment.id)
         except Exception:
             logger.exception('delete')
+            raise falcon.HTTPInternalServerError(config.HTTP_500, 'delete comment failed')
+
+        resp.status = falcon.HTTP_200
+
+class DeleteCommentByTid(BaseHandler):
+
+    def on_delete(self, req, resp, token):
+        site = self.get_site(token)
+        params = json.load(req.stream)
+
+        tid = int(params.get('tid', 0))
+        if not tid or tid < 0:
+            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
+
+        try:
+            delete_comments_by_tid(site, tid)
+        except Exception:
+            logger.exception('delete by tid')
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'delete comment failed')
 
         resp.status = falcon.HTTP_200
