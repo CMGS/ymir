@@ -14,6 +14,8 @@ class TestEnhance(TestBase):
 
     def setUp(self):
         super(TestEnhance, self).setUp()
+        self.get_comments_by_ip_path = '/mp/%s' % self.token
+        self.get_comments_by_fid_path = '/mf/%s' % self.token
 
     def test_get_comments_by_ip(self):
         site = get_site_by_token(self.token)
@@ -23,20 +25,20 @@ class TestEnhance(TestBase):
 
         data = {'ip': ip}
         response = self.send_request(
-            path = '/mp/%s' % self.token, method = 'GET', \
+            path = self.get_comments_by_ip_path, method = 'GET', \
             data = json.dumps(data), \
         )
         self.check(response)
 
         data = {'ip': ip, 'tid': 20}
         response = self.send_request(
-            path = '/mp/%s' % self.token, method = 'GET', \
+            path = self.get_comments_by_ip_path, method = 'GET', \
             data = json.dumps(data), \
         )
         self.check(response)
 
     def test_get_comments_by_ip_400(self):
-        self._test_bad_request('/mp/%s' % self.token, 'GET')
+        self._test_bad_request(self.get_comments_by_ip_path, 'GET')
 
     def test_get_comments_by_fid(self):
         site = get_site_by_token(self.token)
@@ -47,7 +49,7 @@ class TestEnhance(TestBase):
 
         data = {'tid': 30, 'fid': f_comment.id, 'page':1, 'num':2}
         response = self.send_request(
-            path = '/mf/%s' % self.token, method = 'GET', \
+            path = self.get_comments_by_fid_path, method = 'GET', \
             data = json.dumps(data), \
         )
 

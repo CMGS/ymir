@@ -26,7 +26,7 @@ class TestComment(TestBase):
     def test_fake_site(self):
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
         self.send_request(
-            path = '/m/123', method = 'PUT', \
+            path = self.path + 'abc', method = 'PUT', \
             data = json.dumps(data), \
         )
 
