@@ -1,11 +1,13 @@
 #!/usr/bin/python
 #coding:utf-8
 
-from utils.fn import get_node
+import config
 from common import default_db
 from models.site import Site, Block
-
 from query.comment import generate
+
+from utils.cache import rds
+from utils.fn import get_node
 
 site_cache = {}
 
@@ -24,21 +26,27 @@ def create(token, name):
 def block(site, ip):
     site.blocks = Site.blocks + 1
     site.save()
-    return Block.create(sid = site.id, ip = ip)
+    result = Block.create(sid = site.id, ip = ip)
+    rds.set(config.BLOCK_PREFIX % ip, 1)
+    return result
 
 @default_db.commit_on_success
 def delete_block(site, id):
+    block = Block.get(Block.id == id, Block.sid == site.id)
+    rds.delete(config.BLOCK_PREFIX % block.ip)
     site.blocks = Site.blocks - 1
     site.save()
-    return Block.delete().where(
-        Block.id == id, Block.sid == site.id
-    ).execute()
+    return block.delete_instance()
 
 def get_blocks(sid, page, num):
     return Block.select().where(Block.sid == sid).paginate(page, num)
 
-def get_block(sid, ip):
-    return Block.select().where(Block.sid == sid, Block.ip == ip).first()
+def check_block(sid, ip):
+    if rds.get(config.BLOCK_PREFIX % ip) or \
+        Block.select().where(Block.sid == sid, Block.ip == ip).first():
+        rds.set(config.BLOCK_PREFIX % ip, 1)
+        return True
+    return False
 
 def get_site_by_token(token):
     site = site_cache.get(token, None)

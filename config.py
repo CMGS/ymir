@@ -29,6 +29,7 @@ REDIS_POOL_SIZE = 100
 REDIS_PREFIX = 'comment:cache:'
 
 DEFAULT_REDIS_EXPIRE = 86400
+BLOCK_PREFIX = 'comment:block:ip:%s'
 
 REPEAT_TIME = 20
 DENY_TIME = 180

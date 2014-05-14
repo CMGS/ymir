@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from utils import ijson
 from handlers import BaseHandler
-from query.site import get_block
+from query.site import check_block
 from query.comment import create, get_comments, \
         delete_comment
 
@@ -61,7 +61,7 @@ class Comment(CommentBase):
 
         #HEAT PROTECT
         #CACHE FOR LONG TIME
-        if get_block(site.id, ip):
+        if check_block(site.id, ip):
             logger.info('IP %s deny' % ip)
             raise falcon.HTTPForbidden(config.HTTP_403, 'ip %s deny' % ip)
 
