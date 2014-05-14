@@ -1,6 +1,8 @@
 #!/usr/bin/python
 #coding:utf-8
 
+DEBUG = True
+
 DEFAULT_DBHOST = '127.0.0.1'
 DEFAULT_DBPORT = 3306
 DEFAULT_DBUSER = 'root'
@@ -24,7 +26,9 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = ''
 REDIS_POOL_SIZE = 100
-REDIS_PRFIX = 'comment'
+REDIS_PREFIX = 'comment:cache:'
+
+DEFAULT_REDIS_EXPIRE = 86400
 
 REPEAT_TIME = 20
 DENY_TIME = 180

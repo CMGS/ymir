@@ -34,7 +34,7 @@ def cleanup():
         v.drop_table(fail_silently=True)
 
 def generate_path():
-    block = ['init', 'test']
+    block = ['init', 'test', 'libs']
     path = os.path.realpath(os.path.dirname(__file__))
     for path in os.listdir(path):
         if not path.startswith('.') \
