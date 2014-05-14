@@ -76,6 +76,14 @@ def delete_comments_by_tid(site, tid):
     site.save()
     return result
 
+@cross_transactions
+def delete_comments_by_fid(site, fid):
+    comment_table = get_table(site.id, site.token, site.node)
+    result = comment_table.delete().where(comment_table.fid == fid).execute()
+    site.comments = Site.comments - result
+    site.save()
+    return result
+
 def get_comments_by_ip(sid, token, node, ip, tid = -1):
     comment_table = get_table(sid, token, node)
     if tid == -1:

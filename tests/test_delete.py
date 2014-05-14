@@ -16,6 +16,7 @@ class TestEnhanceDelete(TestBase):
         super(TestEnhanceDelete, self).setUp()
         self.delete_by_ip_path = '/dp/%s' % self.token
         self.delete_by_tid_path = '/dt/%s' % self.token
+        self.delete_by_fid_path = '/df/%s' % self.token
         self.create_path = '/m/%s' % self.token
 
     def test_delete_comment_by_ip(self):
@@ -93,5 +94,31 @@ class TestEnhanceDelete(TestBase):
         self.patch(delete, 'delete_comments_by_tid', fake_func)
         data = {'tid': 25}
         self.send_request(path = self.delete_by_tid_path, method = 'DELETE', data = json.dumps(data))
+        self.assertEqual(falcon.HTTP_500, self.mock.status)
+
+    def test_delete_comment_by_fid(self):
+        site = get_site_by_token(self.token)
+        fc = create(site, 26, 0, 1, '127.0.0.5', 'hello')
+        create(site, 26, fc.id, 1, '127.0.0.5', 'hello')
+        create(site, 26, 0, 1, '127.0.0.6', 'hello')
+
+        data = {'fid': 26}
+        response = self.send_request(path = self.delete_by_fid_path, method = 'DELETE', data = json.dumps(data))
+        self.assertEqual(falcon.HTTP_200, self.mock.status)
+        self.assertFalse(response)
+        site_update = get_site_by_token(self.token)
+        self.assertEqual(site.comments - 2, site_update.comments)
+
+    def test_delete_comment_by_fid_400(self):
+        self._test_bad_request(self.delete_by_fid_path, 'DELETE')
+
+    def test_delete_comment_by_fid_500(self):
+        site = get_site_by_token(self.token)
+        fc = create(site, 26, 0, 1, '127.0.0.5', 'hello')
+        create(site, 26, fc.id, 1, '127.0.0.5', 'hello')
+        from handlers import delete
+        self.patch(delete, 'delete_comments_by_fid', fake_func)
+        data = {'fid': fc.id}
+        self.send_request(path = self.delete_by_fid_path, method = 'DELETE', data = json.dumps(data))
         self.assertEqual(falcon.HTTP_500, self.mock.status)
 
