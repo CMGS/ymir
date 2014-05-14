@@ -31,7 +31,7 @@ REDIS_PREFIX = 'comment:cache:'
 DEFAULT_REDIS_EXPIRE = 86400
 BLOCK_PREFIX = 'comment:block:ip:%s'
 BLOCK_COUNT_PREFIX = 'comment:block:count:%s:%s:%s'
-BLOCK_PAGE_CONTENT_PREFIX = 'comment:block:page:%s:%s:%s'
+BLOCK_PAGE_PREFIX = 'comment:block:page:%s:%s:%s'
 
 REPEAT_TIME = 20
 DENY_TIME = 180

@@ -85,6 +85,19 @@ class TestBlock(TestBase):
         data = json.loads(''.join(response))
         self.assertIsInstance(data, list)
 
+        site = get_site_by_token(self.token)
+        block(site, '192.168.1.10')
+        response = self.send_request(
+            path = self.path, method='GET', \
+            data = json.dumps({'page': 1, 'token': self.token, 'num': 1}), \
+        )
+
+        self.assertTrue(is_iter(response))
+        self.assertEqual(falcon.HTTP_200, self.mock.status)
+        data = json.loads(''.join(response))
+        self.assertIsInstance(data, list)
+        self.assertTrue(data[0]['ip'] == '192.168.1.10')
+
     def test_get_block_400(self):
         data = {'page': -1, 'token': self.token, 'num': 1}
         self._test_bad_request(self.path, 'GET', data = data)
