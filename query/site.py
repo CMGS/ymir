@@ -39,7 +39,7 @@ def delete_block(site, id):
     return block.delete_instance()
 
 def get_blocks(sid, page, num):
-    return Block.select().where(Block.sid == sid).paginate(page, num)
+    return Block.select().where(Block.sid == sid).order_by(Block.id.desc()).paginate(page, num)
 
 def check_block(sid, ip):
     if rds.get(config.BLOCK_PREFIX % ip) or \
