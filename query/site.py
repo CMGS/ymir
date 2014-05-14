@@ -1,13 +1,14 @@
 #!/usr/bin/python
 #coding:utf-8
 
+import pickle
 import config
 from common import default_db
 from models.site import Site, Block
 from query.comment import generate
 
 from utils.cache import rds
-from utils.fn import get_node
+from utils.fn import get_node, create_obj
 
 site_cache = {}
 
@@ -26,6 +27,7 @@ def create(token, name):
 def block(site, ip):
     site.blocks = Site.blocks + 1
     site.save()
+    del site_cache[site.token]
     result = Block.create(sid = site.id, ip = ip)
     rds.set(config.BLOCK_PREFIX % ip, 1)
     return result
@@ -36,10 +38,31 @@ def delete_block(site, id):
     rds.delete(config.BLOCK_PREFIX % block.ip)
     site.blocks = Site.blocks - 1
     site.save()
+    del site_cache[site.token]
     return block.delete_instance()
 
-def get_blocks(sid, page, num):
-    return Block.select().where(Block.sid == sid).order_by(Block.id.desc()).paginate(page, num)
+def get_blocks(site, page, num):
+    blocks = rds.get(config.BLOCK_COUNT_PREFIX % (site.token, page, num))
+    if blocks and int(blocks) == site.blocks:
+        key = config.BLOCK_PAGE_CONTENT_PREFIX % (site.token, page, num)
+        result = rds.lrange(key, 0 ,-1)
+        return (create_obj(r) for r in result)
+    else:
+        rds.set(config.BLOCK_COUNT_PREFIX % (site.token, page, num), site.blocks)
+        key = config.BLOCK_PAGE_CONTENT_PREFIX % (site.token, page, num)
+        rds.delete(key)
+        blocks = Block.select() \
+                .where(Block.sid == site.id) \
+                .order_by(Block.id.desc()) \
+                .paginate(page, num)
+        formatter = 'id:%s:ip:%s:ctime:%s'
+        def _():
+            result = []
+            for block in blocks:
+                result.append(formatter % (block.id, block.ip, str(block.ctime)))
+                yield block
+            rds.rpush(key, *result)
+        return _()
 
 def check_block(sid, ip):
     if rds.get(config.BLOCK_PREFIX % ip) or \

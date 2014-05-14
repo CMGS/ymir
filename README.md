@@ -5,6 +5,7 @@ TODO
 1. 查询缓存
   * ~site 存于进程内存中~
   * ~block ip 进 rds backend~
+  * ~block list 进 rds backend~
   * 评论列表需要刷新
 2. ~~遇到没有数据query层直接raise上来~~
 3. 过热保护
