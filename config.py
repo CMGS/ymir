@@ -33,6 +33,7 @@ DEFAULT_REDIS_EXPIRE = 86400
 BLOCK_PREFIX = 'comment:block:ip:%s:%s'
 BLOCK_COUNT_PREFIX = 'comment:block:count:%s:%s:%s'
 BLOCK_PAGE_PREFIX = 'comment:block:page:%s:%s:%s'
+BLOCK_PARAMS = ['id', 'ip', 'ctime']
 
 COMMENT_TABLE_PREFIX = 'comment:%s'
 COMMENT_COUNT_PREFIX = 'comment:count:%s:%s'
@@ -40,6 +41,11 @@ COMMENT_CACHE_PREFIX = 'comment:cache:%s:%s'
 
 COMMENT_F_PAGE_COUNT_PREFIX = 'comment:f:page:count:%s:%s:%s:%s'
 COMMENT_F_PAGE_PREFIX = 'comment:f:page:%s:%s:%s:%s'
+
+COMMENT_T_PAGE_COUNT_PREFIX = 'comment:t:page:count:%s:%s:%s:%s:%s'
+COMMENT_T_PAGE_PREFIX = 'comment:t:page:%s:%s:%s:%s:%s'
+
+COMMENT_PARAMS = ['tid', 'id', 'content', 'ip', 'ctime', 'count', 'fid']
 
 REPEAT_TIME = 20
 DENY_TIME = 180

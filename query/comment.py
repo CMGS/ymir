@@ -71,37 +71,49 @@ def get_comments_by_ip(site, ip, tid = -1):
 @cache_page(
     config.COMMENT_F_PAGE_COUNT_PREFIX, \
     config.COMMENT_F_PAGE_PREFIX, \
-    ['tid', 'id', 'content', 'ip', 'ctime', 'count']
+    config.COMMENT_PARAMS, \
 )
 def get_comments_by_fid(site, count, page, num, fid):
     comment_table = get_table(site.id, site.token, site.node)
     return comment_table \
             .select() \
             .where(comment_table.fid == fid) \
+            .order_by(comment_table.id.desc()) \
             .paginate(page, num)
 
 @cache_obj(
     config.COMMENT_CACHE_PREFIX, \
-    ['id', 'tid', 'uid', 'count'], \
+    config.COMMENT_PARAMS, \
 )
 def get_comment_cached(site, id):
     comment_table = get_table(site.id, site.token, site.node)
     f_comment = comment_table.select().where(comment_table.id == id).first()
     return f_comment
 
-def get_comments(sid, token, node, tid, expand, page, num, fid=0):
-    comment_table = get_table(sid, token, node)
-    comments = comment_table.select().where(comment_table.tid == tid, comment_table.fid == fid).paginate(page, num)
+def get_comments_by_tid(site, tid, expand, page, num):
+    key = config.COMMENT_COUNT_PREFIX % (site.token, tid)
+    # We don't care the count, just notify renew page cache
+    t_count = rds.get(key) or 0
+    return get_comments(site, t_count, page, num, tid, expand)
+
+@cache_page(
+    config.COMMENT_T_PAGE_COUNT_PREFIX, \
+    config.COMMENT_T_PAGE_PREFIX, \
+    config.COMMENT_PARAMS, \
+)
+def get_comments(site, count, page, num, tid, expand):
+    comment_table = get_table(site.id, site.token, site.node)
+    comments = comment_table \
+                .select() \
+                .where(comment_table.tid == tid, comment_table.fid == 0) \
+                .order_by(comment_table.id.desc()) \
+                .paginate(page, num)
     for comment in comments:
         yield comment
         if not expand:
             continue
-        for reply in get_reply_comments(sid, token, node, tid, comment.id, page, num):
+        for reply in get_comments_by_fid(site, comment.count, page, num, comment.id):
             yield reply
-
-def get_reply_comments(sid, token, node, tid, fid, page, num):
-    comment_table = get_table(sid, token, node)
-    return comment_table.select().where(comment_table.tid == tid, comment_table.fid == fid).paginate(page, num)
 
 #internal use
 def get_comment(site, id):

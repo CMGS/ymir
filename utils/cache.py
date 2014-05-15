@@ -71,7 +71,8 @@ def cache_page(count_prefix, page_prefix, keys):
                     for d in data:
                         result.append(msgpack.dumps([(k, getattr(d, k, None)) for k in keys], default=str))
                         yield d
-                    rds.rpush(key, *result)
+                    if result:
+                        rds.rpush(key, *result)
                 rds.set(count_prefix % params, total)
                 return iterator()
         return _

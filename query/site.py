@@ -41,7 +41,8 @@ def delete_block(site, id):
 @cache_page(
     config.BLOCK_COUNT_PREFIX, \
     config.BLOCK_PAGE_PREFIX, \
-    ['id', 'ip', 'ctime'])
+    config.BLOCK_PARAMS, \
+)
 def get_blocks(site, total, page, num):
     return Block.select() \
             .where(Block.sid == site.id) \
