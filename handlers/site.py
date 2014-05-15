@@ -69,7 +69,7 @@ class Block(BaseHandler):
         num = int(params.get('num', config.DEFAULT_PAGE_NUM))
 
         site = self.get_site(token)
-        blocks = get_blocks(site.id, page, num)
+        blocks = get_blocks(site, site.blocks, page, num)
         resp.status = falcon.HTTP_200
         resp.stream = ijson.dump([{'id':block.id, 'ip':block.ip, 'ctime':str(block.ctime)} for block in blocks])
 

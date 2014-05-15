@@ -8,7 +8,8 @@ import logging
 
 from utils import ijson
 from handlers.comment import CommentBase
-from query.comment import get_comments_by_fid, get_comments_by_ip
+from query.comment import get_comments_by_fid, \
+        get_comments_by_ip, get_comment_cached
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +19,16 @@ class CommentByFid(CommentBase):
         site = self.get_site(token)
         params = json.load(req.stream)
 
-        page, num, tid = self.get_page_params(params)
-        fid = int(params.get('fid', 0))
+        page = int(params.get('page', 0))
+        num = int(params.get('num', config.DEFAULT_PAGE_NUM))
+        fid = int(params.get('fid', -1))
+        if page < 1 or num < 0 or fid < 0:
+            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
 
-        comments = get_comments_by_fid(
-            site.id, site.token, site.node, \
-            tid, fid, page, num, \
-        )
+        f_comment = get_comment_cached(site, fid)
+        if not f_comment:
+            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
+        comments = get_comments_by_fid(site, f_comment.count, page, num, f_comment.id)
 
         resp.status = falcon.HTTP_200
         resp.stream = ijson.dump([self.render_comment(comment) for comment in comments])
@@ -40,9 +44,7 @@ class CommentByIP(CommentBase):
         if not ip:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
 
-        comments = get_comments_by_ip(
-            site.id, site.token, site.node, ip, tid, \
-        )
+        comments = get_comments_by_ip(site, ip, tid)
 
         resp.status = falcon.HTTP_200
         resp.stream = ijson.dump([self.render_comment(comment) for comment in comments])

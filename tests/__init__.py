@@ -24,7 +24,7 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = ''
 REDIS_POOL_SIZE = 100
-REDIS_PRFIX = 'comment_test'
+REDIS_PREFIX = 'comment_test'
 
 try:
     from tests.local_config import *

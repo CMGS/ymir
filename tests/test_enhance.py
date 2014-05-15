@@ -4,8 +4,12 @@
 import json
 import falcon
 
+import config
+
 from query.comment import create
 from query.site import get_site_by_token
+
+from utils.cache import rds
 
 from tests.base import is_iter
 from tests.base import TestBase
@@ -54,6 +58,36 @@ class TestEnhance(TestBase):
         )
 
         self.check(response)
+
+        data = {'tid': 30, 'fid': f_comment.id, 'page':1, 'num':2}
+        response = self.send_request(
+            path = self.get_comments_by_fid_path, method = 'GET', \
+            data = json.dumps(data), \
+        )
+
+        self.check(response)
+
+    def test_get_comments_by_fid_400(self):
+        data = {'tid': 30, 'page':1, 'num':2}
+        self.send_request(
+            path = self.get_comments_by_fid_path, method = 'GET', \
+            data = json.dumps(data), \
+        )
+        self.assertEqual(falcon.HTTP_400, self.mock.status)
+
+        data = {'tid': 30, 'fid': 10000, 'page':1, 'num':2}
+        self.send_request(
+            path = self.get_comments_by_fid_path, method = 'GET', \
+            data = json.dumps(data), \
+        )
+        self.assertEqual(falcon.HTTP_400, self.mock.status)
+
+        data = {'tid': 30, 'fid': 10000, 'page':1, 'num':2}
+        self.send_request(
+            path = self.get_comments_by_fid_path, method = 'GET', \
+            data = json.dumps(data), \
+        )
+        self.assertEqual(falcon.HTTP_400, self.mock.status)
 
     def check(self, response):
         self.assertTrue(is_iter(response))

@@ -3,8 +3,8 @@
 
 import json
 import falcon
+import config
 
-from query import comment
 from query.site import block, get_site_by_token
 from query.comment import create, get_comment, cross_transactions
 
@@ -19,9 +19,10 @@ class TestComment(TestBase):
         self.path = '/m/%s' % self.token
 
     def test_get_table(self):
-        comment.local = {}
+        from utils import comment
+        self.patch(comment, 'local_cache', {})
         comment_table = comment.get_table(1, self.token, 0)
-        self.assertEqual(comment.local.get(self.token), comment_table)
+        self.assertEqual(comment.local_cache.get(config.COMMENT_TABLE_PREFIX % self.token), comment_table)
 
     def test_fake_site(self):
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
@@ -91,7 +92,7 @@ class TestComment(TestBase):
         site = get_site_by_token(self.token)
         self.assertEqual(o1 + 5, site.comments)
         o1 = site.comments
-        fc = get_comment(site.id, self.token, site.node, fc.id)
+        fc = get_comment(site, fc.id)
         self.assertEqual(fc.count, 4)
         o2 = fc.count
 
@@ -104,7 +105,7 @@ class TestComment(TestBase):
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
 
-        fc = get_comment(site.id, self.token, site.node, fc.id)
+        fc = get_comment(site, fc.id)
         self.assertEqual(fc.count, o2 - 1)
         site = get_site_by_token(self.token)
         self.assertEqual(o1 - 1, site.comments)

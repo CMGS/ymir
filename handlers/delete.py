@@ -27,9 +27,7 @@ class DeleteCommentByIP(BaseHandler):
             # Because this method will update comment table
             # and Father comment if fid is not 0
             # That's why this method tooooo slow for large data
-            comments = get_comments_by_ip(
-                site.id, site.token, site.node, ip, tid, \
-            )
+            comments = get_comments_by_ip(site, ip, tid)
             f_comments = []
             for comment in comments:
                 if comment.fid != 0:

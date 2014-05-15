@@ -9,8 +9,8 @@ from collections import OrderedDict
 
 from utils import ijson
 from handlers import BaseHandler
-from query.site import get_block
-from query.comment import create, get_comments, \
+from query.site import check_block
+from query.comment import create, get_comments_by_tid, \
         delete_comment
 
 logger = logging.getLogger(__name__)
@@ -59,9 +59,7 @@ class Comment(CommentBase):
         if not tid or not uid or not ip or not content:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
 
-        #HEAT PROTECT
-        #CACHE FOR LONG TIME
-        if get_block(site.id, ip):
+        if check_block(site.id, ip):
             logger.info('IP %s deny' % ip)
             raise falcon.HTTPForbidden(config.HTTP_403, 'ip %s deny' % ip)
 
@@ -79,12 +77,9 @@ class Comment(CommentBase):
         params = json.load(req.stream)
 
         page, num, tid = self.get_page_params(params)
-        expand = bool(params.get('expand', 0))
+        expand = params.get('expand', 0)
 
-        comments = get_comments(
-            site.id, site.token, site.node, \
-            tid, expand, page, num
-        )
+        comments = get_comments_by_tid(site, tid, expand, page, num)
 
         resp.status = falcon.HTTP_200
         resp.stream = self.render_comments(comments)

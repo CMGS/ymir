@@ -9,13 +9,18 @@ from handlers.site import Site, Block
 from handlers.enhance import CommentByFid, CommentByIP
 from handlers.delete import DeleteCommentByIP, DeleteCommentByTid, \
         DeleteCommentByFid
+import config
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-logger.addHandler(logging.StreamHandler())
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s [%(name)s] %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG if config.DEBUG else logging.INFO)
 
 class HelloWorld(object):
     def on_get(self, req, resp):
+        logger.info('Hello World')
         resp.status = falcon.HTTP_200
         resp.body = 'Hello World'
 
