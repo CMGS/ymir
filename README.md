@@ -439,6 +439,7 @@ content-length: 0
     * expand 0 or 1
 * Status
     * 200
+    * 404
     * 400
     * 500
 * Response
@@ -528,5 +529,237 @@ content-type: application/json; charset=utf-8
         }
     ]
 ]
+```
+
+Get Comment by IP
+=================
+
+**import warning**
+
+**this api without cache, that means it will toooooo slow when getting**
+
+* Method
+    * GET
+* Params
+    * ip
+* Status
+    * 200
+    * 400
+    * 500
+* Response
+    * list contain lots dicts, each dicts describe a record.
+
+**Example**
+
+```
+GET /mp/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 21
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "ip": "192.168.1.3"
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 09:14:01 GMT
+Server: gunicorn/18.0
+Transfer-Encoding: chunked
+content-type: application/json; charset=utf-8
+
+[
+    {
+        "content": "Hello World2",
+        "count": 0,
+        "ctime": "2014-05-14 15:04:30",
+        "id": 11,
+        "ip": "192.168.1.3",
+        "tid": 7
+    },
+    {
+        "content": "Hello World2",
+        "count": 0,
+        "ctime": "2014-05-14 15:04:53",
+        "id": 12,
+        "ip": "192.168.1.3",
+        "tid": 7
+    }
+]
+```
+
+Get Comment by Fid
+==================
+
+* Method
+    * GET
+* Params
+    * fid >= 1
+    * page >= 1
+    * num >= 1
+* Status
+    * 200
+    * 404
+    * 400
+    * 500
+* Response
+    A list contain multiple dicts. Each dicts describe a record.
+
+**Example**
+
+```
+GET /mf/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 31
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "fid": 5,
+    "num": 2,
+    "page": 1
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 09:20:08 GMT
+Server: gunicorn/18.0
+Transfer-Encoding: chunked
+content-type: application/json; charset=utf-8
+
+[
+    {
+        "content": "Hello World2",
+        "count": 0,
+        "ctime": "2014-05-15 14:26:42",
+        "id": 14,
+        "ip": "192.168.1.",
+        "tid": 7
+    },
+    {
+        "content": "Hello World2",
+        "count": 0,
+        "ctime": "2014-05-15 12:49:06",
+        "id": 13,
+        "ip": "192.168.1.7",
+        "tid": 7
+    }
+]
+```
+
+Delete Comment by IP
+====================
+
+**import warning**
+
+**this api without cache, that means it will toooooo slow when getting**
+
+* Method
+    * DELETE
+* Params
+    * ip
+* Status
+    * 200
+    * 400
+    * 500
+* Response
+
+
+**Example**
+
+```
+(comment) ❯ http -j DELETE :8000/dp/c16a3a755c1f41c78124e4bc51ca81e0 ip=127.0.0.2 -v
+DELETE /dp/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 19
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "ip": "127.0.0.2"
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 09:29:10 GMT
+Server: gunicorn/18.0
+content-length: 0
+```
+
+Delete Comment by Tid
+=====================
+
+* Method
+    * DELETE
+* Params
+    * tid
+* Status
+    * 200
+    * 400
+    * 500
+* Response
+
+**Example**
+
+```
+DELETE /dt/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 10
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "tid": 1
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 09:33:05 GMT
+Server: gunicorn/18.0
+content-length: 0
+```
+
+Delete Comment by Fid
+=====================
+
+* Method
+    * DELETE
+* Params
+    * tid
+* Status
+    * 200
+    * 400
+    * 500
+* Response
+
+**Example**
+
+```
+DELETE /df/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 11
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "fid": 16
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 09:36:50 GMT
+Server: gunicorn/18.0
+content-length: 0
 ```
 
