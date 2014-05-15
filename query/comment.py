@@ -68,6 +68,12 @@ def get_comments_by_ip(site, ip, tid = -1):
         comments = comment_table.select().where(comment_table.tid == tid, comment_table.ip == ip)
     return comments
 
+def get_comments_by_tid(site, tid, expand, page, num):
+    key = config.COMMENT_COUNT_PREFIX % (site.token, tid)
+    # We don't care the count, just notify renew page cache
+    t_count = rds.get(key) or 0
+    return get_comments(site, t_count, page, num, tid, expand)
+
 @cache_page(
     config.COMMENT_F_PAGE_COUNT_PREFIX, \
     config.COMMENT_F_PAGE_PREFIX, \
@@ -80,21 +86,6 @@ def get_comments_by_fid(site, count, page, num, fid):
             .where(comment_table.fid == fid) \
             .order_by(comment_table.id.desc()) \
             .paginate(page, num)
-
-@cache_obj(
-    config.COMMENT_CACHE_PREFIX, \
-    config.COMMENT_PARAMS, \
-)
-def get_comment_cached(site, id):
-    comment_table = get_table(site.id, site.token, site.node)
-    f_comment = comment_table.select().where(comment_table.id == id).first()
-    return f_comment
-
-def get_comments_by_tid(site, tid, expand, page, num):
-    key = config.COMMENT_COUNT_PREFIX % (site.token, tid)
-    # We don't care the count, just notify renew page cache
-    t_count = rds.get(key) or 0
-    return get_comments(site, t_count, page, num, tid, expand)
 
 @cache_page(
     config.COMMENT_T_PAGE_COUNT_PREFIX, \
@@ -114,6 +105,15 @@ def get_comments(site, count, page, num, tid, expand):
             continue
         for reply in get_comments_by_fid(site, comment.count, page, num, comment.id):
             yield reply
+
+@cache_obj(
+    config.COMMENT_CACHE_PREFIX, \
+    config.COMMENT_PARAMS, \
+)
+def get_comment_cached(site, id):
+    comment_table = get_table(site.id, site.token, site.node)
+    f_comment = comment_table.select().where(comment_table.id == id).first()
+    return f_comment
 
 #internal use
 def get_comment(site, id):
