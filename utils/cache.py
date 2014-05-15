@@ -2,6 +2,7 @@
 #coding:utf-8
 
 import config
+import msgpack
 import logging
 from redis import Redis
 from redis import ConnectionPool
@@ -28,7 +29,7 @@ backend = cache.RedisCache(
 
 local_cache = {}
 
-def cache_obj(prefix, formatter, keys):
+def cache_obj(prefix, keys):
     def wrap(f):
         def _(site, id, *args, **kwargs):
             key = prefix % (site.token, id)
@@ -43,18 +44,21 @@ def cache_obj(prefix, formatter, keys):
                 obj = f(site, id, *args, **kwargs)
                 value = ''
                 if obj:
-                    value = formatter % tuple(str(getattr(obj, key)) for key in keys)
+                    value = msgpack.dumps([(k, getattr(obj, k, None)) for k in keys], default=str)
                 rds.set(key, value)
                 return obj
         return _
     return wrap
 
-def cache_page(count_prefix, page_prefix, formatter, keys):
+def cache_page(count_prefix, page_prefix, keys):
     def wrap(f):
         def _(site, total, page, num, *args, **kwargs):
-            key = page_prefix % (site.token, page, num)
-            count = rds.get(count_prefix % (site.token, page, num))
-            if count and int(count) == total:
+            params = [site.token, page, num]
+            params.extend(args)
+            params = tuple(params)
+            key = page_prefix % params
+            count = rds.get(count_prefix % params)
+            if count and int(count) == int(total):
                 logger.info('get page from cache')
                 result = rds.lrange(key, 0 ,-1)
                 return (create_obj(r) for r in result)
@@ -65,10 +69,10 @@ def cache_page(count_prefix, page_prefix, formatter, keys):
                 def iterator():
                     result = []
                     for d in data:
-                        result.append(formatter % tuple(str(getattr(d, key)) for key in keys))
+                        result.append(msgpack.dumps([(k, getattr(d, k, None)) for k in keys], default=str))
                         yield d
                     rds.rpush(key, *result)
-                rds.set(config.BLOCK_COUNT_PREFIX % (site.token, page, num), total)
+                rds.set(count_prefix % params, total)
                 return iterator()
         return _
     return wrap

@@ -28,7 +28,7 @@ class CommentByFid(CommentBase):
         f_comment = get_comment_cached(site, fid)
         if not f_comment:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
-        comments = get_comments_by_fid(site, f_comment.count, f_comment.id, page, num)
+        comments = get_comments_by_fid(site, f_comment.count, page, num, f_comment.id)
 
         resp.status = falcon.HTTP_200
         resp.stream = ijson.dump([self.render_comment(comment) for comment in comments])

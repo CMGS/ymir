@@ -37,7 +37,9 @@ BLOCK_PAGE_PREFIX = 'comment:block:page:%s:%s:%s'
 COMMENT_TABLE_PREFIX = 'comment:%s'
 COMMENT_COUNT_PREFIX = 'comment:count:%s:%s'
 COMMENT_CACHE_PREFIX = 'comment:cache:%s:%s'
-COMMENT_F_COUNT_PREFIX = 'comment:fid:count:%s:%s:%s'
+
+COMMENT_F_PAGE_COUNT_PREFIX = 'comment:f:page:count:%s:%s:%s:%s'
+COMMENT_F_PAGE_PREFIX = 'comment:f:page:%s:%s:%s:%s'
 
 REPEAT_TIME = 20
 DENY_TIME = 180

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #coding:utf-8
 
-from itertools import izip
+import msgpack
 from common import dbs_mod, dbs_len
 
 def get_node(id):
@@ -17,8 +17,7 @@ class Obj(object):
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
 
-def create_obj(data, split=':'):
-    data = data.split(split)
-    a = iter(data)
-    return Obj(**dict(izip(a, a)))
+def create_obj(data):
+    data = msgpack.unpackb(data)
+    return Obj(**dict(data))
 

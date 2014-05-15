@@ -69,26 +69,19 @@ def get_comments_by_ip(site, ip, tid = -1):
     return comments
 
 @cache_page(
-    config.BLOCK_COUNT_PREFIX, \
-    config.BLOCK_PAGE_PREFIX, \
-    'id:%s:ip:%s:ctime:%s', \
-    ['id', 'ip', 'ctime']
+    config.COMMENT_F_PAGE_COUNT_PREFIX, \
+    config.COMMENT_F_PAGE_PREFIX, \
+    ['tid', 'id', 'content', 'ip', 'ctime', 'count']
 )
-def get_comments_by_fid(site, count, fid, page, num):
+def get_comments_by_fid(site, count, page, num, fid):
     comment_table = get_table(site.id, site.token, site.node)
     return comment_table \
             .select() \
             .where(comment_table.fid == fid) \
             .paginate(page, num)
 
-#FIXME internal use
-def get_comment(site, id):
-    comment_table = get_table(site.id, site.token, site.node)
-    return comment_table.get(comment_table.id == id)
-
 @cache_obj(
     config.COMMENT_CACHE_PREFIX, \
-    'id:%s:tid:%s:uid:%s:count:%s', \
     ['id', 'tid', 'uid', 'count'], \
 )
 def get_comment_cached(site, id):
@@ -109,4 +102,9 @@ def get_comments(sid, token, node, tid, expand, page, num, fid=0):
 def get_reply_comments(sid, token, node, tid, fid, page, num):
     comment_table = get_table(sid, token, node)
     return comment_table.select().where(comment_table.tid == tid, comment_table.fid == fid).paginate(page, num)
+
+#internal use
+def get_comment(site, id):
+    comment_table = get_table(site.id, site.token, site.node)
+    return comment_table.get(comment_table.id == id)
 

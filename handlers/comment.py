@@ -59,8 +59,6 @@ class Comment(CommentBase):
         if not tid or not uid or not ip or not content:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
 
-        #HEAT PROTECT
-        #CACHE FOR LONG TIME
         if check_block(site.id, ip):
             logger.info('IP %s deny' % ip)
             raise falcon.HTTPForbidden(config.HTTP_403, 'ip %s deny' % ip)
