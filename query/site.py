@@ -4,9 +4,9 @@
 import config
 from common import default_db
 from models.site import Site, Block
-from query.comment import generate
 
 from utils.fn import get_node
+from utils.comment import generate
 from utils.cache import rds, cache_page, local_cache
 
 @default_db.commit_on_success

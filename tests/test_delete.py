@@ -35,7 +35,7 @@ class TestEnhanceDelete(TestBase):
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
-        fc_update = get_comment(site.id, site.token, site.node, fc.id)
+        fc_update = get_comment(site, fc.id)
         site_update = get_site_by_token(self.token)
         self.assertEqual(site.comments - 1, site_update.comments)
         self.assertEqual(fc_update.count, 0)
@@ -45,7 +45,7 @@ class TestEnhanceDelete(TestBase):
 
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
-        fc2_update = get_comment(site.id, site.token, site.node, fc2.id)
+        fc2_update = get_comment(site, fc2.id)
         self.assertTrue(fc2_update)
 
         site = get_site_by_token(self.token)
@@ -102,12 +102,14 @@ class TestEnhanceDelete(TestBase):
         create(site, 26, fc.id, 1, '127.0.0.5', 'hello')
         create(site, 26, 0, 1, '127.0.0.6', 'hello')
 
-        data = {'fid': 26}
+        data = {'fid': fc.id}
         response = self.send_request(path = self.delete_by_fid_path, method = 'DELETE', data = json.dumps(data))
         self.assertEqual(falcon.HTTP_200, self.mock.status)
         self.assertFalse(response)
         site_update = get_site_by_token(self.token)
-        self.assertEqual(site.comments - 2, site_update.comments)
+        fc_update = get_comment(site, fc.id)
+        self.assertEqual(fc_update.count, 0)
+        self.assertEqual(site.comments - 1, site_update.comments)
 
     def test_delete_comment_by_fid_400(self):
         self._test_bad_request(self.delete_by_fid_path, 'DELETE')

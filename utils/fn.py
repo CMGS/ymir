@@ -17,8 +17,8 @@ class Obj(object):
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
 
-def create_obj(data):
-    data = data.split(':')
+def create_obj(data, split=':'):
+    data = data.split(split)
     a = iter(data)
     return Obj(**dict(izip(a, a)))
 

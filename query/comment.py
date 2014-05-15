@@ -2,44 +2,10 @@
 #coding:utf-8
 
 import config
-import common
 from models.site import Site
-from models.comment import Comment
 
-local = {}
-
-def generate(sid, token, node):
-    table_name = '%s_%d' % (config.DEFAULT_TABLE_NAME, sid)
-    database = common.dbs[node]
-    comment_table = type(table_name.upper(), (Comment, ), {})
-    comment_table._meta.database = database
-    comment_table._meta.table_name = table_name
-    local[token] = comment_table
-    return comment_table
-
-def get_table(sid, token, node):
-    comment_table = local.get(token, None)
-    if not comment_table:
-        comment_table = generate(sid, token, node)
-    return comment_table
-
-def cross_transactions(f):
-    def _(site, *args):
-        common.default_db.set_autocommit(False)
-        common.dbs[site.node].set_autocommit(False)
-        try:
-            result = f(site, *args)
-            common.default_db.commit()
-            common.dbs[site.node].commit()
-            return result
-        except Exception:
-            common.default_db.rollback()
-            common.dbs[site.node].rollback()
-            raise
-        finally:
-            common.default_db.set_autocommit(True)
-            common.dbs[site.node].set_autocommit(True)
-    return _
+from utils.cache import rds, cache_page, cache_obj
+from utils.comment import cross_transactions, get_table
 
 @cross_transactions
 def create(site, tid, fid, uid, ip, content):
@@ -48,9 +14,11 @@ def create(site, tid, fid, uid, ip, content):
     site.save()
     comment = comment_table.create(tid=tid, fid=fid, uid=uid, ip=ip, content=content)
     if fid:
-        f_comment = get_comment(site.id, site.token, site.node, fid)
+        f_comment = get_comment(site, fid)
         f_comment.count = comment_table.count + 1
         f_comment.save()
+        rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, fid))
+    rds.incr(config.COMMENT_COUNT_PREFIX % (site.token, tid))
     return comment
 
 @cross_transactions
@@ -60,12 +28,14 @@ def delete_comment(site, id):
     instance.delete_instance()
     result = comment_table.delete().where(comment_table.fid == id).execute()
     if instance.fid:
-        f_comment = get_comment(site.id, site.token, site.node, instance.fid)
+        f_comment = get_comment(site, instance.fid)
         f_comment.count = comment_table.count - 1
         f_comment.save()
+        rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, instance.fid))
     result += 1
     site.comments = Site.comments - result
     site.save()
+    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, instance.tid), result)
     return result
 
 @cross_transactions
@@ -74,33 +44,57 @@ def delete_comments_by_tid(site, tid):
     result = comment_table.delete().where(comment_table.tid == tid).execute()
     site.comments = Site.comments - result
     site.save()
+    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, tid), result)
     return result
 
 @cross_transactions
 def delete_comments_by_fid(site, fid):
     comment_table = get_table(site.id, site.token, site.node)
+    f_comment = get_comment(site, fid)
     result = comment_table.delete().where(comment_table.fid == fid).execute()
+    f_comment.count = comment_table.count - result
+    f_comment.save()
     site.comments = Site.comments - result
     site.save()
+    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, f_comment.tid), result)
     return result
 
-def get_comments_by_ip(sid, token, node, ip, tid = -1):
-    comment_table = get_table(sid, token, node)
+#FIXME TOOOOOO SLOW, NOT CACHED
+def get_comments_by_ip(site, ip, tid = -1):
+    comment_table = get_table(site.id, site.token, site.node)
     if tid == -1:
         comments = comment_table.select().where(comment_table.ip == ip)
     else:
         comments = comment_table.select().where(comment_table.tid == tid, comment_table.ip == ip)
     return comments
 
-def get_comments_by_fid(sid, token, node, tid, fid, page, num):
-    comment_table = get_table(sid, token, node)
-    return comment_table.select().where(
-                comment_table.tid == tid, comment_table.fid == fid
-            ).paginate(page, num)
+@cache_page(
+    config.BLOCK_COUNT_PREFIX, \
+    config.BLOCK_PAGE_PREFIX, \
+    'id:%s:ip:%s:ctime:%s', \
+    ['id', 'ip', 'ctime']
+)
+def get_comments_by_fid(site, count, fid, page, num):
+    comment_table = get_table(site.id, site.token, site.node)
+    return comment_table \
+            .select() \
+            .where(comment_table.fid == fid) \
+            .paginate(page, num)
 
-def get_comment(sid, token, node, id):
-    comment_table = get_table(sid, token, node)
+#FIXME internal use
+def get_comment(site, id):
+    comment_table = get_table(site.id, site.token, site.node)
     return comment_table.get(comment_table.id == id)
+
+@cache_obj(
+    config.COMMENT_CACHE_PREFIX, \
+    'id:%s:tid:%s:uid:%s:count:%s', \
+    ['id', 'tid', 'uid', 'count'], \
+)
+def get_comment_cached(site, id):
+    comment_table = get_table(site.id, site.token, site.node)
+    f_comment = comment_table.select().where(comment_table.id == id).first()
+    return f_comment
 
 def get_comments(sid, token, node, tid, expand, page, num, fid=0):
     comment_table = get_table(sid, token, node)

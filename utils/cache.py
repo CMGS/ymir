@@ -28,20 +28,40 @@ backend = cache.RedisCache(
 
 local_cache = {}
 
+def cache_obj(prefix, formatter, keys):
+    def wrap(f):
+        def _(site, id, *args, **kwargs):
+            key = prefix % (site.token, id)
+            obj = rds.get(key)
+            if obj is not None:
+                logger.info('get obj from cache')
+                if not obj:
+                    return obj
+                return create_obj(obj)
+            else:
+                logger.info('obj cache miss')
+                obj = f(site, id, *args, **kwargs)
+                value = ''
+                if obj:
+                    value = formatter % tuple(str(getattr(obj, key)) for key in keys)
+                rds.set(key, value)
+                return obj
+        return _
+    return wrap
+
 def cache_page(count_prefix, page_prefix, formatter, keys):
     def wrap(f):
-        def _(site, total, page, num, **kwargs):
+        def _(site, total, page, num, *args, **kwargs):
+            key = page_prefix % (site.token, page, num)
             count = rds.get(count_prefix % (site.token, page, num))
             if count and int(count) == total:
-                logger.info('get from cache')
-                key = page_prefix % (site.token, page, num)
+                logger.info('get page from cache')
                 result = rds.lrange(key, 0 ,-1)
                 return (create_obj(r) for r in result)
             else:
-                logger.info('cache miss')
-                key = page_prefix % (site.token, page, num)
+                logger.info('page cache miss')
                 rds.delete(key)
-                data = f(site, total, page, num, **kwargs)
+                data = f(site, total, page, num, *args, **kwargs)
                 def iterator():
                     result = []
                     for d in data:

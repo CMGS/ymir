@@ -29,11 +29,15 @@ def cleanup():
     from models.site import Site, Block
     Site.drop_table(fail_silently=True)
     Block.drop_table(fail_silently=True)
-    from query.comment import local
-    for k, v in local.iteritems():
+    from utils.cache import local_cache
+    for k, v in local_cache.iteritems():
+        if not k.startswith('comment:'):
+            continue
         v.drop_table(fail_silently=True)
     from utils.cache import rds
-    rds.delete(*rds.keys('comment:*'))
+    keys = rds.keys('comment:*')
+    if keys:
+        rds.delete(*keys)
 
 def generate_path():
     block = ['init', 'test', 'libs']
