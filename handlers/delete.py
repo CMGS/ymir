@@ -31,11 +31,11 @@ class DeleteCommentByIP(BaseHandler):
             f_comments = []
             for comment in comments:
                 if comment.fid != 0:
-                    delete_comment(site, comment.id)
+                    delete_comment(site, comment)
                     continue
                 f_comments.append(comment)
             for comment in f_comments:
-                delete_comment(site, comment.id)
+                delete_comment(site, comment)
         except Exception:
             logger.exception('delete')
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'delete comment failed')

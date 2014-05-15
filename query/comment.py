@@ -22,20 +22,20 @@ def create(site, tid, fid, uid, ip, content):
     return comment
 
 @cross_transactions
-def delete_comment(site, id):
+def delete_comment(site, comment):
     comment_table = get_table(site.id, site.token, site.node)
-    instance = comment_table.get(comment_table.id == id)
-    instance.delete_instance()
-    result = comment_table.delete().where(comment_table.fid == id).execute()
-    if instance.fid:
-        f_comment = get_comment(site, instance.fid)
+    comment.delete_instance()
+    result = comment_table.delete().where(comment_table.fid == comment.id).execute()
+    if comment.fid:
+        f_comment = get_comment(site, comment.fid)
         f_comment.count = comment_table.count - 1
         f_comment.save()
-        rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, instance.fid))
+        rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, comment.fid))
     result += 1
     site.comments = Site.comments - result
     site.save()
-    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, instance.tid), result)
+    rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, comment.id))
+    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, comment.tid), result)
     return result
 
 @cross_transactions
@@ -112,8 +112,8 @@ def get_comments(site, count, page, num, tid, expand):
 )
 def get_comment_cached(site, id):
     comment_table = get_table(site.id, site.token, site.node)
-    f_comment = comment_table.select().where(comment_table.id == id).first()
-    return f_comment
+    comment = comment_table.select().where(comment_table.id == id).first()
+    return comment
 
 #internal use
 def get_comment(site, id):
