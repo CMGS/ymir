@@ -32,6 +32,8 @@ def cleanup():
     from query.comment import local
     for k, v in local.iteritems():
         v.drop_table(fail_silently=True)
+    from utils.cache import rds
+    rds.delete(*rds.keys('comment:*'))
 
 def generate_path():
     block = ['init', 'test', 'libs']

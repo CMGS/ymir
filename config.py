@@ -29,7 +29,7 @@ REDIS_POOL_SIZE = 100
 REDIS_PREFIX = 'comment:cache:'
 
 DEFAULT_REDIS_EXPIRE = 86400
-BLOCK_PREFIX = 'comment:block:ip:%s'
+BLOCK_PREFIX = 'comment:block:ip:%s:%s'
 BLOCK_COUNT_PREFIX = 'comment:block:count:%s:%s:%s'
 BLOCK_PAGE_PREFIX = 'comment:block:page:%s:%s:%s'
 

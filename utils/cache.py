@@ -26,6 +26,8 @@ backend = cache.RedisCache(
     key_prefix = config.REDIS_PREFIX, \
 )
 
+local_cache = {}
+
 def cache_page(count_prefix, page_prefix, formatter, keys):
     def wrap(f):
         def _(site, total, page, num, **kwargs):
