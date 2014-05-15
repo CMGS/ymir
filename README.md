@@ -99,7 +99,7 @@ Site Control
 
 #### Method
 
-*PUT
+* PUT
 
 #### Create a Site
 
@@ -107,7 +107,10 @@ Site Control
     * PUT
 * Params
     * name
-* Status 201
+* Status
+    * 201
+    * 400
+    * 500
 * Response
     * token
 
@@ -154,7 +157,10 @@ Block Control
 * Params
     * ip
     * token
-* Status 201
+* Status
+    * 201
+    * 400
+    * 500
 * Response
     * id
 
@@ -192,7 +198,10 @@ content-type: application/json; charset=utf-8
     * DELETE
 * Params
     * id
-* Status 200
+* Status
+    * 200
+    * 400
+    * 500
 * Response
 
 **Example**
@@ -226,7 +235,10 @@ content-length: 0
     * token
     * page >= 1
     * num >= 1
-* Status 200
+* Status
+    * 200
+    * 400
+    * 500
 * Response
     A list contain less than num dicts. Each dicts describe a block ip info.
 
@@ -266,6 +278,255 @@ content-type: application/json; charset=utf-8
         "id": 15,
         "ip": "192.168.1.7"
     }
+]
+```
+
+Comment Interface
+=================
+
+#### Method
+
+* PUT
+* DELETE
+* GET
+
+#### Create a Comment
+
+* Method
+    * PUT
+* Params
+    * tid >= 0
+    * fid >= 0
+    * uid >= 1
+    * ip
+    * content
+* Status
+    * 200
+    * 400
+    * 403 if ip is blocked
+    * 500
+* Response
+    * id
+
+**Example**
+
+```
+PUT /m/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 77
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "content": "Hello World2",
+    "fid": 0,
+    "ip": "192.168.1.1",
+    "tid": 7,
+    "uid": 1
+}
+
+HTTP/1.1 201 Created
+Connection: close
+Date: Thu, 15 May 2014 08:27:09 GMT
+Server: gunicorn/18.0
+Transfer-Encoding: chunked
+content-type: application/json; charset=utf-8
+
+{
+    "id": 17
+}
+```
+
+**if IP was Blocked**
+
+```
+PUT /m/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 78
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "content": "Hello World2",
+    "fid": 0,
+    "ip": "192.168.1.2",
+    "tid": 7,
+    "uid": 1
+}
+
+HTTP/1.1 403 Forbidden
+Connection: close
+Date: Thu, 15 May 2014 08:28:11 GMT
+Server: gunicorn/18.0
+content-length: 78
+content-type: application/json; charset=utf-8
+
+{
+    "description": "ip 192.168.1.2 deny",
+    "title": "Request Forbidden"
+}
+```
+
+#### Delete a Comment
+
+* Method
+    * DELETE
+* Params
+    * id
+* Status
+    * 200
+    * 400
+    * 404
+    * 500
+* Response
+
+**Example**
+
+```
+DELETE /m/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 10
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "id": 31
+}
+
+HTTP/1.1 404 Not Found
+Connection: close
+Date: Thu, 15 May 2014 08:50:10 GMT
+Server: gunicorn/18.0
+content-length: 0
+```
+
+if comment exist.
+
+```
+DELETE /m/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 10
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "id": 17
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 08:50:28 GMT
+Server: gunicorn/18.0
+content-length: 0
+```
+
+#### Get comments by topic id
+
+* Method
+    * GET
+* Params
+    * tid >= 1
+    * page >= 1
+    * num >= 1
+    * expand 0 or 1
+* Status
+    * 200
+    * 400
+    * 500
+* Response
+    A list contain multiple lists. Each list contain more than one dict if expand is 1.
+
+**Example**
+
+```
+GET /m/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 44
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "expand": 0,
+    "num": 1,
+    "page": 1,
+    "tid": 7
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 09:01:27 GMT
+Server: gunicorn/18.0
+Transfer-Encoding: chunked
+content-type: application/json; charset=utf-8
+
+[
+    [
+        {
+            "content": "Hello World2",
+            "count": 0,
+            "ctime": "2014-05-15 16:26:06",
+            "id": 16,
+            "ip": "192.168.1.",
+            "tid": 7
+        }
+    ]
+]
+```
+
+with expand
+
+```
+GET /m/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 44
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "expand": 1,
+    "num": 1,
+    "page": 1,
+    "tid": 7
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Thu, 15 May 2014 09:02:19 GMT
+Server: gunicorn/18.0
+Transfer-Encoding: chunked
+content-type: application/json; charset=utf-8
+
+[
+    [
+        {
+            "content": "Hello World2",
+            "count": 1,
+            "ctime": "2014-05-15 16:26:06",
+            "id": 16,
+            "ip": "192.168.1.",
+            "tid": 7
+        },
+        {
+            "content": "Hello World2",
+            "count": 0,
+            "ctime": "2014-05-15 17:02:12",
+            "id": 18,
+            "ip": "192.168.1.11",
+            "tid": 7
+        }
+    ]
 ]
 ```
 

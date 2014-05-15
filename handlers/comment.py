@@ -11,7 +11,7 @@ from utils import ijson
 from handlers import BaseHandler
 from query.site import check_block
 from query.comment import create, get_comments_by_tid, \
-        delete_comment
+        delete_comment, get_comment_cached
 
 logger = logging.getLogger(__name__)
 
@@ -92,8 +92,12 @@ class Comment(CommentBase):
         if not id:
             raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
 
+        comment = get_comment_cached(site, id)
+        if not comment:
+            raise falcon.HTTPNotFound()
+
         try:
-            delete_comment(site, id)
+            delete_comment(site, comment)
         except Exception:
             logger.exception('delete')
             raise falcon.HTTPInternalServerError(config.HTTP_500, 'delete comment failed')

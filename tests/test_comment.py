@@ -138,6 +138,14 @@ class TestComment(TestBase):
         )
         self.assertEqual(falcon.HTTP_500, self.mock.status)
 
+    def test_delete_404(self):
+        self.send_request(
+            path = self.path, \
+            data = json.dumps({'id': 100}), \
+            method = 'DELETE'
+        )
+        self.assertEqual(falcon.HTTP_404, self.mock.status)
+
     def test_get_empty(self):
         data = {'tid':100, 'page':1, 'num':1, 'expand':0}
         response = self.send_request(
