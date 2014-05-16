@@ -26,7 +26,7 @@ APIs
 * /dp/{token}       ---> [Delete Comment by IP (Only for Admin)](#delete-comment-by-ip)
 * /dt/{token}       ---> [Delete Comment by Tid (Only for Admin)](#delete-comment-by-tid)
 * /df/{token}       ---> [Delete Comment by Fid (Only for Admin)](#delete-comment-by-fid)
-* /up/{token}/{cid} ---> [Up vote a comment (Not Implement yet)](#)
+* /u/{token}        ---> [Up a comment](#up_a_comment)
 
 Hello World
 =========
@@ -761,5 +761,91 @@ Connection: close
 Date: Thu, 15 May 2014 09:36:50 GMT
 Server: gunicorn/18.0
 content-length: 0
+```
+
+Up A Comment
+============
+
+#### Method
+
+* PUT
+* GET
+
+#### Up a comment
+
+* Method
+    * PUT
+* Params
+    * cids
+* Status
+    * 200
+    * 400
+* Response
+
+**Example**
+
+```
+PUT /u/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 22
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "cids": [
+        "15",
+        "16"
+    ]
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Fri, 16 May 2014 08:20:31 GMT
+Server: gunicorn/18.0
+content-length: 0
+```
+
+#### Get comments counts
+
+* Method
+    * GET
+* Params
+    * cids
+* Status
+    * 200
+    * 400
+* Response
+    A dict include count for each comment id.
+
+**Example**
+```
+GET /u/c16a3a755c1f41c78124e4bc51ca81e0 HTTP/1.1
+Accept: application/json
+Accept-Encoding: gzip, deflate, compress
+Content-Length: 22
+Content-Type: application/json; charset=utf-8
+Host: localhost:8000
+User-Agent: HTTPie/0.8.0
+
+{
+    "cids": [
+        "15",
+        "16"
+    ]
+}
+
+HTTP/1.1 200 OK
+Connection: close
+Date: Fri, 16 May 2014 08:22:58 GMT
+Server: gunicorn/18.0
+Transfer-Encoding: chunked
+content-type: application/json; charset=utf-8
+
+{
+    "15": "1",
+    "16": "1"
+}
 ```
 
