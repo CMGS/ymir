@@ -7,6 +7,7 @@ import config
 from utils.heat import req_rate
 
 from handlers.sys import Sys
+from handlers.up import UpComment
 from handlers.comment import Comment
 from handlers.site import Site, Block
 from handlers.enhance import CommentByFid, CommentByIP
@@ -32,6 +33,7 @@ app.add_route('/sys', Sys())
 app.add_route('/site', Site())
 app.add_route('/block', Block())
 app.add_route('/m/{token}', Comment())
+app.add_route('/u/{token}', UpComment())
 app.add_route('/mp/{token}', CommentByIP())
 app.add_route('/mf/{token}', CommentByFid())
 app.add_route('/dp/{token}', DeleteCommentByIP())
