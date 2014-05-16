@@ -27,7 +27,7 @@ class TestSite(TestBase):
 
         self._test_bad_request('/site', 'PUT')
 
-    def test_create_500(self):
+    def test_create_site_500(self):
         self.patch(site, 'create', fake_func)
 
         self.send_request(path = '/site', data = json.dumps({'name': 'test'}))
