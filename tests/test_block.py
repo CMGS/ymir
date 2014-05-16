@@ -5,10 +5,10 @@ import json
 import falcon
 
 import config
-from utils.fn import Obj
 from utils.cache import rds
 from query.site import block, get_site_by_token, check_block
 
+from tests.base import wrap
 from tests.base import is_iter
 from tests.base import TestBase
 from tests.base import fake_func
@@ -110,15 +110,7 @@ class TestBlock(TestBase):
 
     def test_get_block_from_cache(self):
         from handlers import site
-        def _wrap(f):
-            def _(*args, **kwargs):
-                r = f(*args, **kwargs)
-                for i in r:
-                    if isinstance(i, Obj):
-                        i.ctime = True
-                    yield i
-            return _
-        self.patch(site, 'get_blocks', _wrap(site.get_blocks))
+        self.patch(site, 'get_blocks', wrap(site.get_blocks))
 
         response = self.send_request(
             path = self.path, method='GET', \

@@ -53,7 +53,8 @@ class TestEnhance(TestBase):
             data = json.dumps(data), \
         )
 
-        self.check(response)
+        result = self.check(response)
+        self.assertEqual(result[0]['content'],  'world')
 
         data = {'tid': 30, 'fid': f_comment.id, 'page':1, 'num':2}
         response = self.send_request(
@@ -61,7 +62,9 @@ class TestEnhance(TestBase):
             data = json.dumps(data), \
         )
 
-        self.check(response)
+        result = self.check(response)
+        self.assertEqual(result[0]['content'],  'world')
+        self.assertEqual(result[1]['content'],  'hello')
 
     def test_get_comments_by_fid_400(self):
         data = {'tid': 30, 'page':1, 'num':2}
@@ -79,6 +82,8 @@ class TestEnhance(TestBase):
         )
         self.assertEqual(falcon.HTTP_404, self.mock.status)
 
+
+    def test_get_comments_from_cache(self):
         data = {'tid': 30, 'fid': 10000, 'page':1, 'num':2}
         self.send_request(
             path = self.get_comments_by_fid_path, method = 'GET', \
@@ -94,6 +99,7 @@ class TestEnhance(TestBase):
         self.assertIsInstance(result, list)
 
         self.check_comment(result)
+        return result
 
     def check_comment(self, result):
         if len(result) == 2:
