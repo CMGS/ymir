@@ -28,7 +28,7 @@ class CommentByFid(CommentBase):
         f_comment = get_comment_cached(site, fid)
         if not f_comment:
             raise falcon.HTTPNotFound()
-        comments = get_comments_by_fid(site, f_comment.count, page, num, f_comment.id)
+        comments = get_comments_by_fid(site, f_comment.count, page, num, fid = f_comment.id)
 
         resp.status = falcon.HTTP_200
         resp.stream = ijson.dump([self.render_comment(comment) for comment in comments])

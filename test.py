@@ -31,11 +31,11 @@ def cleanup():
     Block.drop_table(fail_silently=True)
     from utils.cache import local_cache
     for k, v in local_cache.iteritems():
-        if not k.startswith('comment:'):
+        if not v:
             continue
         v.drop_table(fail_silently=True)
     from utils.cache import rds
-    keys = rds.keys('comment:*')
+    keys = rds.keys('c:*')
     if keys:
         rds.delete(*keys)
 

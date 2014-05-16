@@ -22,16 +22,7 @@ class TestComment(TestBase):
         from utils import comment
         self.patch(comment, 'local_cache', {})
         comment_table = comment.get_table(1, self.token, 0)
-        self.assertEqual(comment.local_cache.get(config.COMMENT_TABLE_PREFIX % self.token), comment_table)
-
-    def test_fake_site(self):
-        data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
-        self.send_request(
-            path = self.path + 'abc', method = 'PUT', \
-            data = json.dumps(data), \
-        )
-
-        self.assertEqual(falcon.HTTP_404, self.mock.status)
+        self.assertEqual(comment.local_cache.get(config.COMMENT_TABLE_PREFIX.format(token = self.token)), comment_table)
 
     def test_create_comment(self):
         site = get_site_by_token(self.token)
@@ -52,12 +43,14 @@ class TestComment(TestBase):
         self.assertTrue(id)
         self.assertIsInstance(id, int)
 
+    def test_create_comment_400(self):
         self._test_bad_request(self.path, 'PUT', {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.1.1',})
 
-    def test_create_comment_deny(self):
+    def test_create_comment_403(self):
         site = get_site_by_token(self.token)
-        block(site, '192.168.9.1')
-        data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.9.1', 'content':'Hello World'}
+        ip = '192.168.9.1'
+        block(site, ip)
+        data = {'tid':1, 'fid':1, 'uid':1, 'ip':ip, 'content':'Hello World'}
         response = self.send_request(
             path = self.path, method = 'PUT', \
             data = json.dumps(data), \
@@ -65,6 +58,15 @@ class TestComment(TestBase):
 
         self.assertIsInstance(response, list)
         self.assertEqual(falcon.HTTP_403, self.mock.status)
+
+    def test_create_comment_404(self):
+        data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}
+        self.send_request(
+            path = self.path + 'abc', method = 'PUT', \
+            data = json.dumps(data), \
+        )
+
+        self.assertEqual(falcon.HTTP_404, self.mock.status)
 
     def test_create_comment_500(self):
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.9.2', 'content':'Hello World'}
@@ -125,6 +127,14 @@ class TestComment(TestBase):
     def test_delete_400(self):
         self._test_bad_request(self.path, 'DELETE')
 
+    def test_delete_404(self):
+        self.send_request(
+            path = self.path, \
+            data = json.dumps({'id': 100}), \
+            method = 'DELETE'
+        )
+        self.assertEqual(falcon.HTTP_404, self.mock.status)
+
     def test_delete_500(self):
         site = get_site_by_token(self.token)
         fc = create(site, 20, 0, 1, '192.168.101.2', 'hello')
@@ -138,15 +148,7 @@ class TestComment(TestBase):
         )
         self.assertEqual(falcon.HTTP_500, self.mock.status)
 
-    def test_delete_404(self):
-        self.send_request(
-            path = self.path, \
-            data = json.dumps({'id': 100}), \
-            method = 'DELETE'
-        )
-        self.assertEqual(falcon.HTTP_404, self.mock.status)
-
-    def test_get_empty(self):
+    def test_get_no_comments(self):
         data = {'tid':100, 'page':1, 'num':1, 'expand':0}
         response = self.send_request(
             path = self.path, method = 'GET', \

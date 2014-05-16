@@ -30,20 +30,20 @@ REDIS_PREFIX = 'comment:cache:'
 
 DEFAULT_REDIS_EXPIRE = 86400
 
-BLOCK_PREFIX = 'comment:block:ip:%s:%s'
-BLOCK_COUNT_PREFIX = 'comment:block:count:%s:%s:%s'
-BLOCK_PAGE_PREFIX = 'comment:block:page:%s:%s:%s'
+BLOCK_PREFIX = 'c:b:{sid}:{ip}'
+BLOCK_COUNT_PREFIX = 'c:b:c:{sid}:{page}:{num}'
+BLOCK_PAGE_PREFIX = 'c:b:p:{sid}:{page}:{num}'
 BLOCK_PARAMS = ['id', 'ip', 'ctime']
 
-COMMENT_TABLE_PREFIX = 'comment:%s'
-COMMENT_COUNT_PREFIX = 'comment:count:%s:%s'
-COMMENT_CACHE_PREFIX = 'comment:cache:%s:%s'
+COMMENT_TABLE_PREFIX = 'c:{token}'
+COMMENT_COUNT_PREFIX = 'c:c:{sid}:{tid}'
+COMMENT_CACHE_PREFIX = 'c:o:{sid}:{id}'
 
-COMMENT_F_PAGE_COUNT_PREFIX = 'comment:f:page:count:%s:%s:%s:%s'
-COMMENT_F_PAGE_PREFIX = 'comment:f:page:%s:%s:%s:%s'
+COMMENT_F_PAGE_COUNT_PREFIX = 'c:f:c:{sid}:{fid}:{page}:{num}'
+COMMENT_F_PAGE_PREFIX = 'c:f:p:{sid}:{fid}:{page}:{num}'
 
-COMMENT_T_PAGE_COUNT_PREFIX = 'comment:t:page:count:%s:%s:%s:%s:%s'
-COMMENT_T_PAGE_PREFIX = 'comment:t:page:%s:%s:%s:%s:%s'
+COMMENT_T_PAGE_COUNT_PREFIX = 'c:t:c:{sid}:{tid}:{expand}:{page}:{num}'
+COMMENT_T_PAGE_PREFIX = 'c:t:p:{sid}:{tid}:{expand}:{page}:{num}'
 
 COMMENT_PARAMS = ['tid', 'id', 'content', 'ip', 'ctime', 'count', 'fid']
 

@@ -68,9 +68,6 @@ class TestEnhanceDelete(TestBase):
         self.request_delete_by_ip({'ip': '127.0.0.5'})
         self.assertEqual(falcon.HTTP_500, self.mock.status)
 
-    def request_delete_by_ip(self, data):
-        return self.send_request(path = self.delete_by_ip_path, method = 'DELETE', data = json.dumps(data))
-
     def test_delete_comment_by_tid(self):
         site = get_site_by_token(self.token)
         fc = create(site, 25, 0, 1, '127.0.0.5', 'hello')
@@ -123,4 +120,7 @@ class TestEnhanceDelete(TestBase):
         data = {'fid': fc.id}
         self.send_request(path = self.delete_by_fid_path, method = 'DELETE', data = json.dumps(data))
         self.assertEqual(falcon.HTTP_500, self.mock.status)
+
+    def request_delete_by_ip(self, data):
+        return self.send_request(path = self.delete_by_ip_path, method = 'DELETE', data = json.dumps(data))
 

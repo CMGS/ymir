@@ -17,8 +17,8 @@ def create(site, tid, fid, uid, ip, content):
         f_comment = get_comment(site, fid)
         f_comment.count = comment_table.count + 1
         f_comment.save()
-        rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, fid))
-    rds.incr(config.COMMENT_COUNT_PREFIX % (site.token, tid))
+        rds.delete(config.COMMENT_CACHE_PREFIX.format(sid = site.id, id = fid))
+    rds.incr(config.COMMENT_COUNT_PREFIX.format(sid = site.id, tid = tid))
     return comment
 
 @cross_transactions
@@ -26,16 +26,17 @@ def delete_comment(site, comment):
     comment_table = get_table(site.id, site.token, site.node)
     comment.delete_instance()
     result = comment_table.delete().where(comment_table.fid == comment.id).execute()
+    need_delete_keys = [config.COMMENT_CACHE_PREFIX.format(sid = site.id, id = comment.id)]
     if comment.fid:
         f_comment = get_comment(site, comment.fid)
         f_comment.count = comment_table.count - 1
         f_comment.save()
-        rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, comment.fid))
+        need_delete_keys.append(config.COMMENT_CACHE_PREFIX.format(sid = site.id, id = comment.fid))
     result += 1
     site.comments = Site.comments - result
     site.save()
-    rds.delete(config.COMMENT_CACHE_PREFIX % (site.token, comment.id))
-    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, comment.tid), result)
+    rds.delete(*need_delete_keys)
+    rds.decr(config.COMMENT_COUNT_PREFIX.format(sid = site.id, tid = comment.tid), result)
     return result
 
 @cross_transactions
@@ -44,7 +45,7 @@ def delete_comments_by_tid(site, tid):
     result = comment_table.delete().where(comment_table.tid == tid).execute()
     site.comments = Site.comments - result
     site.save()
-    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, tid), result)
+    rds.decr(config.COMMENT_COUNT_PREFIX.format(sid = site.id, tid = tid), result)
     return result
 
 @cross_transactions
@@ -56,7 +57,7 @@ def delete_comments_by_fid(site, fid):
     f_comment.save()
     site.comments = Site.comments - result
     site.save()
-    rds.decr(config.COMMENT_COUNT_PREFIX % (site.token, f_comment.tid), result)
+    rds.decr(config.COMMENT_COUNT_PREFIX.format(sid = site.id, tid = f_comment.tid), result)
     return result
 
 #FIXME TOOOOOO SLOW, NOT CACHED
@@ -69,10 +70,10 @@ def get_comments_by_ip(site, ip, tid = -1):
     return comments
 
 def get_comments_by_tid(site, tid, expand, page, num):
-    key = config.COMMENT_COUNT_PREFIX % (site.token, tid)
+    total = config.COMMENT_COUNT_PREFIX.format(sid = site.id, tid = tid)
     # We don't care the count, just notify renew page cache
-    t_count = rds.get(key) or 0
-    return get_comments(site, t_count, page, num, tid, expand)
+    count = rds.get(total) or 0
+    return get_comments(site, count, page, num, tid = tid, expand = expand)
 
 @cache_page(
     config.COMMENT_F_PAGE_COUNT_PREFIX, \
@@ -103,7 +104,7 @@ def get_comments(site, count, page, num, tid, expand):
         yield comment
         if not expand:
             continue
-        for reply in get_comments_by_fid(site, comment.count, page, num, comment.id):
+        for reply in get_comments_by_fid(site, comment.count, page, num, fid = comment.id):
             yield reply
 
 @cache_obj(

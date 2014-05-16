@@ -7,8 +7,18 @@ import types
 from app import app
 import falcon
 from falcon import testing
+from utils.fn import Obj
 
 TEST_TOKEN = 'test_token'
+
+def wrap(f):
+    def _(*args, **kwargs):
+        r = f(*args, **kwargs)
+        for i in r:
+            if isinstance(i, Obj):
+                i.ctime = True
+            yield i
+    return _
 
 def is_iter(o):
     return isinstance(o, types.GeneratorType)

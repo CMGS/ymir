@@ -64,9 +64,9 @@ class Block(BaseHandler):
     def on_get(self, req, resp):
         token, page, params = self.parse_params(req, 'page')
         page = int(page)
-        if page < 1:
-            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
         num = int(params.get('num', config.DEFAULT_PAGE_NUM))
+        if page < 1 or num < 0:
+            raise falcon.HTTPBadRequest(config.HTTP_400, 'invalid params')
 
         site = self.get_site(token)
         blocks = get_blocks(site, site.blocks, page, num)
