@@ -50,30 +50,34 @@ def cache_obj(prefix, keys):
         return _
     return wrap
 
-def cache_page(count_prefix, page_prefix, keys):
+def cache_page(count_prefix, page_prefix, attrs):
     def wrap(f):
         def _(site, total, page, num, *args, **kwargs):
-            params = [site.token, page, num]
-            params.extend(args)
-            params = tuple(params)
-            key = page_prefix % params
-            count = rds.get(count_prefix % params)
+            params = {'sid': site.id, 'page': page, 'num': num}
+            params.update(kwargs)
+            page_key = page_prefix.format(**params)
+            count_key = count_prefix.format(**params)
+            count = rds.get(count_key)
             if count and int(count) == int(total):
                 logger.info('get page from cache')
-                result = rds.lrange(key, 0 ,-1)
+                result = rds.lrange(page_key, 0 ,-1)
                 return (create_obj(r) for r in result)
             else:
                 logger.info('page cache miss')
-                rds.delete(key)
+                rds.delete(page_key)
                 data = f(site, total, page, num, *args, **kwargs)
                 def iterator():
                     result = []
-                    for d in data:
-                        result.append(msgpack.dumps([(k, getattr(d, k, None)) for k in keys], default=str))
-                        yield d
+                    for item in data:
+                        result.append(
+                            msgpack.dumps(
+                                [(key, getattr(item, key, None)) for key in attrs], \
+                                default=str)
+                        )
+                        yield item
                     if result:
-                        rds.rpush(key, *result)
-                rds.set(count_prefix % params, total)
+                        rds.rpush(page_key, *result)
+                rds.set(count_key, total)
                 return iterator()
         return _
     return wrap

@@ -137,7 +137,7 @@ class TestBlock(TestBase):
         block(site, ip)
 
         self.assertTrue(check_block(site.id, ip))
-        rds.delete(config.BLOCK_PREFIX % (site.id, ip))
+        rds.delete(config.BLOCK_PREFIX.format(sid = site.id, ip = ip))
         self.assertTrue(check_block(site.id, ip))
         self.assertFalse(check_block(site.id, '192.168.1.12'))
 

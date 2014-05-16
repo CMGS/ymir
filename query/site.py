@@ -26,13 +26,13 @@ def block(site, ip):
     site.save()
     del local_cache[site.token]
     result = Block.create(sid = site.id, ip = ip)
-    rds.set(config.BLOCK_PREFIX % (site.id, ip), 1)
+    rds.set(config.BLOCK_PREFIX.format(sid = site.id, ip = ip), 1)
     return result
 
 @default_db.commit_on_success
 def delete_block(site, id):
     block = Block.get(Block.id == id, Block.sid == site.id)
-    rds.delete(config.BLOCK_PREFIX % (site.id, block.ip))
+    rds.delete(config.BLOCK_PREFIX.format(sid = site.id, ip = block.ip))
     site.blocks = Site.blocks - 1
     site.save()
     del local_cache[site.token]
@@ -50,10 +50,10 @@ def get_blocks(site, total, page, num):
             .paginate(page, num)
 
 def check_block(sid, ip):
-    if rds.get(config.BLOCK_PREFIX % (sid, ip)):
+    if rds.get(config.BLOCK_PREFIX.format(sid = sid, ip = ip)):
         return True
     elif Block.select().where(Block.sid == sid, Block.ip == ip).first():
-        rds.set(config.BLOCK_PREFIX % (sid, ip), 1)
+        rds.set(config.BLOCK_PREFIX.format(sid = sid, ip = ip), 1)
         return True
     return False
 

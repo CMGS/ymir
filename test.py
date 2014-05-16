@@ -35,7 +35,7 @@ def cleanup():
             continue
         v.drop_table(fail_silently=True)
     from utils.cache import rds
-    keys = rds.keys('comment:*')
+    keys = rds.keys('c:*')
     if keys:
         rds.delete(*keys)
 

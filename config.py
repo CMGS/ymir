@@ -30,9 +30,9 @@ REDIS_PREFIX = 'comment:cache:'
 
 DEFAULT_REDIS_EXPIRE = 86400
 
-BLOCK_PREFIX = 'comment:block:ip:%s:%s'
-BLOCK_COUNT_PREFIX = 'comment:block:count:%s:%s:%s'
-BLOCK_PAGE_PREFIX = 'comment:block:page:%s:%s:%s'
+BLOCK_PREFIX = 'c:b:{sid}:{ip}'
+BLOCK_COUNT_PREFIX = 'c:b:c:{sid}:{page}:{num}'
+BLOCK_PAGE_PREFIX = 'c:b:p:{sid}:{page}:{num}'
 BLOCK_PARAMS = ['id', 'ip', 'ctime']
 
 COMMENT_TABLE_PREFIX = 'comment:%s'
