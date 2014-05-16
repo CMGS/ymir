@@ -3,13 +3,15 @@
 
 import falcon
 import logging
+import config
+from utils.heat import req_rate
+
 from handlers.sys import Sys
 from handlers.comment import Comment
 from handlers.site import Site, Block
 from handlers.enhance import CommentByFid, CommentByIP
 from handlers.delete import DeleteCommentByIP, DeleteCommentByTid, \
         DeleteCommentByFid
-import config
 
 logger = logging.getLogger()
 handler = logging.StreamHandler()
@@ -24,7 +26,7 @@ class HelloWorld(object):
         resp.status = falcon.HTTP_200
         resp.body = 'Hello World'
 
-app = falcon.API()
+app = falcon.API(before=[req_rate])
 app.add_route('/', HelloWorld())
 app.add_route('/sys', Sys())
 app.add_route('/site', Site())

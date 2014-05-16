@@ -44,12 +44,13 @@ class TestBase(testing.TestBase):
         self.assertEqual(result['title'], config.HTTP_400)
         self.assertEqual(falcon.HTTP_400, self.mock.status)
 
-    def send_request(self, path='/', data='', method='PUT'):
+    def send_request(self, path='/', data='', method='PUT', **kwargs):
         response = app(
             testing.create_environ(
                 path=path, \
                 method=method, \
                 body=data, \
+                **kwargs
             ), \
             self.mock, \
         )
