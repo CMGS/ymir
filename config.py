@@ -47,6 +47,8 @@ COMMENT_T_PAGE_PREFIX = 'c:t:p:{sid}:{tid}:{expand}:{page}:{num}'
 
 COMMENT_PARAMS = ['tid', 'id', 'content', 'ip', 'ctime', 'count', 'fid']
 
+COMMENT_UP_PREFIX = 'c:u:{sid}:{cid}'
+
 HEAT_MAX = 3
 HEAT_TIME = 20
 HEAT_KEY = 'c:h:{ip}'
