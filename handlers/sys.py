@@ -20,7 +20,6 @@ class Sys(BaseHandler):
             elif k.startswith('REDIS_'):
                 result['redis'].append(getattr(config, k))
         result['store'] = config.STORE
-        result['deny'] = config.DENY_TIME
         resp.status = falcon.HTTP_200
         resp.stream = ijson.dump(result)
 
