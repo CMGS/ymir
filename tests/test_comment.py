@@ -22,7 +22,7 @@ class TestComment(TestBase):
         from utils import comment
         self.patch(comment, 'local_cache', {})
         comment_table = comment.get_table(1, self.token, 0)
-        self.assertEqual(comment.local_cache.get(config.COMMENT_TABLE_PREFIX % self.token), comment_table)
+        self.assertEqual(comment.local_cache.get(config.COMMENT_TABLE_PREFIX.format(token = self.token)), comment_table)
 
     def test_fake_site(self):
         data = {'tid':1, 'fid':1, 'uid':1, 'ip':'192.168.8.1', 'content':'Hello World'}

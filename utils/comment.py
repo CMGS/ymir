@@ -12,11 +12,11 @@ def generate(sid, token, node):
     comment_table = type(table_name.upper(), (Comment, ), {})
     comment_table._meta.database = database
     comment_table._meta.table_name = table_name
-    local_cache[config.COMMENT_TABLE_PREFIX % token] = comment_table
+    local_cache[config.COMMENT_TABLE_PREFIX.format(token = token)] = comment_table
     return comment_table
 
 def get_table(sid, token, node):
-    comment_table = local_cache.get(config.COMMENT_TABLE_PREFIX % token, None)
+    comment_table = local_cache.get(config.COMMENT_TABLE_PREFIX.format(token = token), None)
     if not comment_table:
         comment_table = generate(sid, token, node)
     return comment_table

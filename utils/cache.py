@@ -29,11 +29,13 @@ backend = cache.RedisCache(
 
 local_cache = {}
 
-def cache_obj(prefix, keys):
+def cache_obj(prefix, attrs):
     def wrap(f):
         def _(site, id, *args, **kwargs):
-            key = prefix % (site.token, id)
-            obj = rds.get(key)
+            params = {'sid': site.id, 'id': id}
+            params.update(kwargs)
+            cache_key = prefix.format(**params)
+            obj = rds.get(cache_key)
             if obj is not None:
                 logger.info('get obj from cache')
                 if not obj:
@@ -44,8 +46,8 @@ def cache_obj(prefix, keys):
                 obj = f(site, id, *args, **kwargs)
                 value = ''
                 if obj:
-                    value = msgpack.dumps([(k, getattr(obj, k, None)) for k in keys], default=str)
-                rds.set(key, value)
+                    value = msgpack.dumps([(attr, getattr(obj, attr, None)) for attr in attrs], default=str)
+                rds.set(cache_key, value)
                 return obj
         return _
     return wrap
